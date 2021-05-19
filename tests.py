@@ -18,7 +18,7 @@ mB = np.array([2])
 A_tensorB = np.zeros([1,3,3], dtype=float)
 A_tensorB[0] = np.array([[-0.0989, 0.0, 0.0],
                          [0.0, -0.0989, 0.0],
-                         [0.0, 0.0, 1.7569]]
+                         [0.0, 0.0, 1.7569]])
 
 #E-E coupling parameters
 J = 0.0
@@ -311,7 +311,7 @@ class TestGammaCompute(unittest.TestCase):
                                     
 #-----------------------------------------------------------------------------#
 
-class TestGammaCompute(unittest.TestCase):
+class TestKMC(unittest.TestCase):
 
     global nA, mA, A_tensorA
     global nB, mB, A_tensorB
