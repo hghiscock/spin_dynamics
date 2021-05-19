@@ -9,16 +9,16 @@ import spin_dynamics
 nA = 1
 mA = np.array([2])
 A_tensorA = np.zeros([1,3,3], dtype=float)
-A_tensorA[0] = [[-0.0636, 0.0, 0.0],
-                [0.0, -0.0636, 0.0],
-                [0.0, 0.0, 1.0812]]
+A_tensorA[0] = np.array([[-0.0636, 0.0, 0.0],
+                         [0.0, -0.0636, 0.0],
+                         [0.0, 0.0, 1.0812]])
 
 nB = 1
 mB = np.array([2])
 A_tensorB = np.zeros([1,3,3], dtype=float)
-A_tensorB[0] = [[-0.0989, 0.0, 0.0],
-                [0.0, -0.0989, 0.0],
-                [0.0, 0.0, 1.7569]]
+A_tensorB[0] = np.array([[-0.0989, 0.0, 0.0],
+                         [0.0, -0.0989, 0.0],
+                         [0.0, 0.0, 1.7569]]
 
 #E-E coupling parameters
 J = 0.0
