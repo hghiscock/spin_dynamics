@@ -56,3 +56,34 @@ hB.transform(B0, theta, phi)
 
 print(compute_singlet_yield(parameters, hA=hA, hB=hB))
 ```
+This will output the singlet yield for a radical pair in a static magnetic field of strength 50 mT and direction relative to the principle axis of the radical pair described by (theta, phi) = (0, 0) with symmetric recombination, kS = kT = 1.0 x 10^6 s^(-1). The two radicals are uncoupled, and both include a single spin-1/2 nucleus with hyperfine tensor given by A_tensor(A/B). Because the system is fully separable, the Hamiltonians for each radical are handled separately, greatly speeding up the calculation, and combined only to calculate the singlet yield.
+
+Where the previous example contained separate Hamiltonians `hA` and `hB`, here's an example using a different calculation type and a non-separable Hilbert space
+```python
+# E-E coupling parameters
+J = 0.0
+D = -0.4065
+D_epsilon = np.pi/4.0
+
+
+# RF field parameters
+B1 = 50
+theta_rf = 0.0
+phi_rf = 0.0
+w_rf = 1.317E7
+phase = 0.0
+
+#-----------------------------------------------------------------------------#
+
+parameters = Parameters(calculation_flag='floquet', kS=1.0E3, kT=1.0E3,
+                        J=J, D=D, D_epsilon=D_epsilon, num_threads=1,
+                        epsilon=epsilon, nfrequency_flag='single_frequency')
+h = build_hamiltonians(parameters, nA, nB, mA, mB, A_tensorA, A_tensorB)
+h.transform(B0, theta, phi, B1, theta_rf, phi_rf)
+h.floquet_matrices(parameters, w_rf, phase)
+
+print(compute_singlet_yield(parameters, h=h))
+```
+In contrast to the previous example, with a non-separable Hilbert space the function `build_hamiltonians` outputs a single class object representing the combined Hilbert space. The `transform` function also takes additional arguments to define the time-dependent field. There is an additional function call `floquet_matrices` that is required to provide the necessary matrices to use the Floquet algoriothm to compute the singlet yield.
+ 
+The file `tests.py` contains unit tests for each possible type of calculation using this package, which serves as a useful template for all the configurations of different parameters that lead to different computations.
