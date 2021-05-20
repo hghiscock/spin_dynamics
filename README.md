@@ -1,8 +1,5 @@
 # spin_dynamics
 Python package for calculating the yield of radical pair reactions with either a static or a periodic time dependent external field.
-## To do
-- Change .todense() to .toarray()
-- Change assertEqual to assertAlmostEqual
 ### Installation
 Prerequisites:
 - Python 3
