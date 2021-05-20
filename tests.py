@@ -292,7 +292,7 @@ class TestGammaCompute(unittest.TestCase):
     global nB, mB, A_tensorB
     global B0, theta, phi
     global B1, theta_rf, phi_rf
-    global w_rf
+    global w_rf, nt
 
     def test_sy_calc(self):
         parameters = spin_dynamics.Parameters(
@@ -316,6 +316,7 @@ class TestKMC(unittest.TestCase):
     global nA, mA, A_tensorA
     global nB, mB, A_tensorB
     global B0, theta, phi
+    global ntrajectories
 
     def test_sy_calc(self):
         parameters = spin_dynamics.Parameters(
