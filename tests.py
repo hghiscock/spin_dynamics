@@ -74,8 +74,8 @@ class TestSymmetricUncoupledExact(unittest.TestCase):
 
         output = spin_dynamics.compute_singlet_yield(parameters, hA=hA, hB=hB)
 
-        self.assertAlmostEqual(output, 0.3549952509525301,
-                               "Symmetric Uncoupled Exact failed")
+        self.assertAlmostEqual(output, 0.3549952509525301, places=7,
+                               message="Symmetric Uncoupled Exact failed")
                                     
 #-----------------------------------------------------------------------------#
 
@@ -98,8 +98,8 @@ class TestSymmetricUncoupledApprox(unittest.TestCase):
 
         output = spin_dynamics.compute_singlet_yield(parameters, hA=hA, hB=hB)
 
-        self.assertAlmostEqual(output, 0.3550022946649809, 
-                               "Symmetric Uncoupled Approx failed")
+        self.assertAlmostEqual(output, 0.3550022946649809, places=7,
+                               message="Symmetric Uncoupled Approx failed")
 
 #-----------------------------------------------------------------------------#
 
@@ -121,8 +121,8 @@ class TestSymmetricCoupledExact(unittest.TestCase):
 
         output = spin_dynamics.compute_singlet_yield(parameters, h=h)
 
-        self.assertAlmostEqual(output, 0.3655773420988036,
-                               "Symmetric Uncoupled Approx failed")
+        self.assertAlmostEqual(output, 0.3655773420988036, places=7,
+                               message="Symmetric Uncoupled Approx failed")
 
 #-----------------------------------------------------------------------------#
 
@@ -144,8 +144,8 @@ class TestAsymmetricExact(unittest.TestCase):
 
         output = spin_dynamics.compute_singlet_yield(parameters, h=h)
 
-        self.assertAlmostEqual(output, 0.8192001880650205,
-                               "Asymmetric Exact failed")
+        self.assertAlmostEqual(output, 0.8192001880650205, places=7,
+                               message="Asymmetric Exact failed")
 
 #-----------------------------------------------------------------------------#
 
@@ -168,8 +168,8 @@ class TestAsymmetricApprox(unittest.TestCase):
 
         output = spin_dynamics.compute_singlet_yield(parameters, h=h)
 
-        self.assertAlmostEqual(output, 0.8182861386174415,
-                               "Asymmetric Approx failed")
+        self.assertAlmostEqual(output, 0.8182861386174415, places=7,
+                               message="Asymmetric Approx failed")
 
 #-----------------------------------------------------------------------------#
 
@@ -196,8 +196,8 @@ class TestFloquetUncoupledSingleFrequency(unittest.TestCase):
 
         output = spin_dynamics.compute_singlet_yield(parameters, hA=hA, hB=hB)
 
-        self.assertAlmostEqual(output, 0.3539557463720032,
-                               "Floquet Uncoupled Single Frequency failed")
+        self.assertAlmostEqual(output, 0.3539557463720032, places=7,
+                               message="Floquet Uncoupled Single Frequency failed")
                                     
 #-----------------------------------------------------------------------------#
 
@@ -227,8 +227,8 @@ class TestFloquetUncoupledBroadband(unittest.TestCase):
 
         output = spin_dynamics.compute_singlet_yield(parameters, hA=hA, hB=hB)
 
-        self.assertAlmostEqual(output, 0.3539557463720032,
-                               "Floquet Uncoupled Broadband failed")
+        self.assertAlmostEqual(output, 0.3539557463720032, places=7,
+                               message="Floquet Uncoupled Broadband failed")
                                     
 #-----------------------------------------------------------------------------#
 
@@ -253,8 +253,8 @@ class TestFloquetCoupledSingleFrequency(unittest.TestCase):
 
         output = spin_dynamics.compute_singlet_yield(parameters, h=h)
 
-        self.assertAlmostEqual(output, 0.3646169371256939,
-                               "Floquet Coupled Single Frequency failed")
+        self.assertAlmostEqual(output, 0.3646169371256939, places=7,
+                               message="Floquet Coupled Single Frequency failed")
                                     
 #-----------------------------------------------------------------------------#
 
@@ -281,8 +281,8 @@ class TestFloquetCoupledBroadband(unittest.TestCase):
 
         output = spin_dynamics.compute_singlet_yield(parameters, h=h)
 
-        self.assertAlmostEqual(output, 0.3506744668044209,
-                               "Floquet Coupled Broadband failed")
+        self.assertAlmostEqual(output, 0.3506744668044209, places=7,
+                               message="Floquet Coupled Broadband failed")
                                     
 #-----------------------------------------------------------------------------#
 
@@ -306,8 +306,8 @@ class TestGammaCompute(unittest.TestCase):
 
         output = spin_dynamics.compute_singlet_yield(parameters, h=h)
 
-        self.assertAlmostEqual(output, 0.3539554614892267,
-                               "Gamma Compute failed")
+        self.assertAlmostEqual(output, 0.3539554614892267, places=7,
+                               message="Gamma Compute failed")
                                     
 #-----------------------------------------------------------------------------#
 
