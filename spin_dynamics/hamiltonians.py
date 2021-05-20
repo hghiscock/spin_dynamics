@@ -116,7 +116,7 @@ class CombinedHamiltonians:
         self.hjd = sparse.csr_matrix((self.m,self.m), dtype=complex)
 
         #Find singlet states as eigenvectors of singlet projection operator
-        _, self.Svectors = linalg.eigh(self.ps.todense(), eigvals = 
+        _, self.Svectors = linalg.eigh(self.ps.toarray(), eigvals = 
                                        (int(self.m-(self.m/4)),int(self.m-1)))
 
     def build_jd(self, parameters, hA, hB):
@@ -173,7 +173,7 @@ class SymmetricUncoupled(Hamiltonians):
                  + self.hhf
 
         #Compute eigensystem
-        self.e, self.ev = linalg.eigh(self.h.todense(), turbo = True, 
+        self.e, self.ev = linalg.eigh(self.h.toarray(), turbo = True, 
                                       overwrite_a = True)
         self.evi = np.conj(self.ev.T)
 
@@ -232,7 +232,7 @@ class SymmetricCoupled(CombinedHamiltonians):
                            * np.sin(theta)
                            + self.hz*np.cos(theta))\
                  + self.hhf + self.hjd
-        self.e, self.ev = linalg.eigh(self.h.todense(), turbo = True,
+        self.e, self.ev = linalg.eigh(self.h.toarray(), turbo = True,
                                       overwrite_a = True)
         self.evi = np.conj(self.ev.T)
         self.tps = np.dot(self.evi, self.ps.dot(self.ev))
@@ -264,7 +264,7 @@ class AsymmetricExact(CombinedHamiltonians):
 
         self.c = h - 1.0j*self.K
 
-        self.e, right_ev = linalg.eig(self.c.todense())
+        self.e, right_ev = linalg.eig(self.c.toarray())
         right_evi = linalg.inv(right_ev)
         left_evi = np.conj(right_evi.T)
         left_ev = np.conj(right_ev.T)
@@ -600,7 +600,7 @@ class GammaComputeSeparate(Hamiltonians):
                                    dtype=complex)
         for i in range(parameters.nt):
             htmp = self.h0 + self.h1 * np.sin(w_rf*(i+0.5)*self.tau)
-            self.propagator[i] = linalg.expm(-1.0j*self.tau*htmp.todense())
+            self.propagator[i] = linalg.expm(-1.0j*self.tau*htmp.toarray())
             if (i > 0):
                 self.propagator[i] = np.dot(self.propagator[i],self.propagator[i-1])
 
@@ -660,7 +660,7 @@ class GammaCompute(CombinedHamiltonians):
         for i in range(parameters.nt):
             tps[i] = np.dot(self.XT, 
                             np.dot(self.propagatorH[i],
-                                   np.dot(self.ps.todense(),
+                                   np.dot(self.ps.toarray(),
                                           np.dot(self.propagator[i],self.X))))
             g_rs[i] = tps[i]*np.exp(-1.0j*float(i)*self.tau*omega_rs)
 
