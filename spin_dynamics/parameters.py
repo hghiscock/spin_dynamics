@@ -4,23 +4,68 @@ import numpy as np
 #------------------------------------------------------------------------------#
 
 class Parameters:
-    '''Parameters for calculation
-    contains:
+    '''Specify the parameters for spin_dynamics calculation
 
-    Type of calculation             calculation_flag
-    Recombination rates             kS, kT
-    Flag if symmetric               symmetric_flag
-    Electron coupling               J, D, D_epsilon
-    Flag if coupled                 coupled_flag
-    Number of threads               num_threads
+    Parameters 
+    ----------
+    calculation_flag : str, optional
+        Specify which type of calculation to run. Options are static,
+        floquet, gamma_compute, KMC (Default: static)
+    kS : float, optional
+        Singlet recombination reaction rate (Default: 1.0E6)
+    kT : float, optional
+        Triplet recombination reaction rate (Default: 1.0E6)
+    J : float, optional
+        Exchange coupling strength in mT (Default: 0.0)
+    D : float, optional
+        Dipolar coupling strength in mT (Default: 0.0)
+    D_epsilon : float, optional
+        Angle defining the dipolar coupling tensor (Default: 0.0)
+    num_threads : int, optional
+        Number of threads to run calculation steps. NOTE: the linear
+        algebra steps will automatically parallelise, to control the
+        number of threads on these steps, set the environment variables
+        e.g. OMP_NUM_THREADS (Default: 1)
+    approx_flag : str, optional
+        For static calculations, determine whether to run the exact or
+        approximate calculation. Options exact or approx. (Default: exact)
+    epsilon : float, optional
+        Set convergence parameter for approximate static or floquet
+        calculations (Default: 100)
+    nlow_bins : int, optional
+        Number of 'low' frequency histogram bins (Default: 4000)
+    nhigh_bins : int, optional
+        Number of 'high' frequency histogram bins (Default: 1000)
+    nfrequency_flag : str, optional
+        Specify if floquet calculation is for a single mode or broadband
+        (Default: broadband)
+    nt : int, optional
+        Number of time steps into which to divide time period of gamma_compute
+        calculation (Default: 128)
+    ntrajectories : int, optional
+        Number of KMC trajectories to average over (Default: 1000000)
 
-    Flag if approximation           approx_flag
-    Tolerance parameter             epsilon
-    Histogram parameters            nlow_bins, nhigh_bins, nbins
-                                    divider_bin, low_delta, low_bins
-    Flag for number of freqs        nfrequencies_flag
-    Number of time steps            nt
-    Number of trajectories          ntrajectories
+    Returns
+    -------
+    p : Parameters
+        Object containing the calculation parameters
+
+    Raises
+    ------
+    Rate constants too large for approx calculation
+        Trying to use recombination rate constants that are too large
+        for the approximate method for asymmetric recombination
+    Coupling cannot be included for approx calculation
+        For symmetric or asymmetric "static" calculations, J or D cannot
+        be non-zero for the approximate methods
+    Symmetric recombination required for floquet calculation
+        The Floquet algorithm requires symmetric recombination
+    Symmetric recombination required for gamma compute calculation
+        The gamma compute algorithm requires symmetric recombination
+    Coupling cannot be included for gamma compute calculation
+        J and D must be zero for a gamma compute calculation
+    Unrecognised calculation flag
+        If the calculation flag is not recognised
 '''
     def __init__(self, calculation_flag="static", kS=1.0E6, kT=1.0E6,
                  J=0.0, D=0.0, D_epsilon=0.0, num_threads=1,
