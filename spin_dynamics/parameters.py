@@ -66,6 +66,14 @@ class Parameters:
         J and D must be zero for a gamma compute calculation
     Unrecognised calculation flag
         If the calculation flag is not recognised
+
+    Notes
+    -----
+    A radical pair is not separable if one or more of these applies:
+        The radicals are coupled i.e. non-zero J or D
+        Asymmetric recombination
+        Gamma compute calculation
+        KMC calculation
 '''
     def __init__(self, calculation_flag="static", kS=1.0E6, kT=1.0E6,
                  J=0.0, D=0.0, D_epsilon=0.0, num_threads=1,
