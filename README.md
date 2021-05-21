@@ -1,4 +1,5 @@
 # spin_dynamics
+Testing
 Python package for calculating the yield of radical pair reactions with either a static or a periodic time dependent external field.
 ### Installation
 Prerequisites:
