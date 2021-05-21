@@ -158,10 +158,20 @@ class SymmetricUncoupled(Hamiltonians):
 
     def transform(self, B0, theta, phi):
         '''Form Hamiltonian for field direction specified by theta and phi 
-        and field strength B0 (muT)
-        Compute the eigensystem decomposition and transform spin operators 
-        into the radical eigenbasis
-        outputs self.{e, ev, evi, sx, sy, sz, h}
+        and field strength B0
+
+        Parameters
+        ----------
+        B0 : float
+            External field strength in muT
+        theta : float
+            Polar angle of the external field
+        phi : float
+            Azimuthal angle of the external field
+
+        Returns
+        -------
+        self.{h, e, ev, evi, sx, sy, sz}
 '''
         gamma_e = 1.76E5
         omega_0 = B0*gamma_e
@@ -189,9 +199,17 @@ class SymmetricApprox(SymmetricUncoupled):
 '''
 
     def bin_frequencies(self, parameters):
-        '''Construct histogram and bin frequencies
-        outputs histogram bins self.bins and 
-        binned spin correlation tensors self.{rab, r0}
+        '''Construct histogram in frequencies and bin contributions to spin
+        correlation tensors
+
+        Parameters
+        ----------
+        parameters : Parameters
+            Object containing calculation parameters 
+
+        Returns
+        -------
+        self.{rab, r0}
 '''
         #Construct histogram
         max_gap = self.e[-1] - self.e[0]+1.0
@@ -220,10 +238,20 @@ class SymmetricCoupled(CombinedHamiltonians):
 '''
     def transform(self, B0, theta, phi):
         '''Form Hamiltonian for field direction specified by theta and phi 
-        and field strength B0 (micro Tesla)
-        Compute the eigensystem decomposition and Singlet projection operator
-        into the combined eigenbasis
-        outputs self.{e, ev, evi, sx, sy, sz, tps, tpt, h}
+        and field strength B0
+
+        Parameters
+        ----------
+        B0 : float
+            External field strength in muT
+        theta : float
+            Polar angle of the external field
+        phi : float
+            Azimuthal angle of the external field
+
+        Returns
+        -------
+        self.{h, e, ev, evi, sx, sy, sz, tps, tpt}
 '''
         gamma_e = 1.76E5
         omega_0 = B0*gamma_e
@@ -249,10 +277,20 @@ class AsymmetricExact(CombinedHamiltonians):
 '''
     def transform(self, B0, theta, phi):
         '''Form Hamiltonian for field direction specified by theta and phi 
-        and field strength B0 (micro Tesla)
-        Compute the eigensystem decomposition and transform
-        into the combined eigenbasis
-        outputs self.{e, trho0, tA, c}
+        and field strength B0
+
+        Parameters
+        ----------
+        B0 : float
+            External field strength in muT
+        theta : float
+            Polar angle of the external field
+        phi : float
+            Azimuthal angle of the external field
+
+        Returns
+        -------
+        self.{c, e, trho0, tA}
 '''
         gamma_e = 1.76E5
         omega_0 = B0*gamma_e
@@ -286,11 +324,23 @@ class AsymmetricApprox:
         self.m = hA.m * hB.m
 
     def transform(self, B0, theta, phi):
-        '''Form separate Hamiltonians for radicals A and B for field direction 
-        specified by theta and phi and field strength B0 (micro Tesla)
-        Compute the eigensystem decompositions
-        Computes hA.transform(...) and hB.transform(...)
-        outputs self.{e, esort}
+        '''Form Hamiltonian for field direction specified by theta and phi 
+        and field strength B0
+
+        Parameters
+        ----------
+        B0 : float
+            External field strength in muT
+        theta : float
+            Polar angle of the external field
+        phi : float
+            Azimuthal angle of the external field
+
+        Returns
+        -------
+        self.{e, esort}
+        self.hA.transform(...)
+        self.hB.transform(...)
 '''
         self.hA.transform(B0, theta, phi)
         self.hB.transform(B0, theta, phi)
@@ -303,8 +353,21 @@ class AsymmetricApprox:
     def build_degenerate_blocks(self, parameters):
         '''Comstruct nearly degenerate subspaces in the Hamiltonians relative
         to the recombination rates for use in perturbation
-        Returns dimension of subspaces (mblock), number of subspaces (nblocks)
-        and the corresponding indices in the separate Hamiltonians (indices)
+
+        Parameters
+        ----------
+        parameters : Parameters
+            Object containing calculation parameters
+
+        Returns
+        -------
+        self.mblock : (M) array_like, int
+            Dimension of subspaces
+        self.nblocks : int
+            Number of subspaces
+        self.indices : (M,2) array_like, int
+            Indices in the separate Hamiltonians corresponding to states
+            in subspaces in the combined Hilbert space
 '''
         self.mblock, self.nblocks = degeneracy_check(
                                     self.e, max(parameters.kS, parameters.kT),
@@ -322,6 +385,16 @@ class AsymmetricApprox:
     def calculate_singlet_yield(self, parameters):
         '''Function to calculate the singlet yield using the degenerate
         subspaces and non-Hermitian perturbation theory
+
+        Parameters
+        ----------
+        parameters : Parameters
+            Object containing calculation parameters
+
+        Returns
+        -------
+        PhiS : float
+            Singlet yield
 '''
         PhiS = 0.0
         imin = 1
@@ -363,9 +436,38 @@ class FloquetUncoupledBroadband(SymmetricUncoupled):
                           phase=0.0, theta_rf=0.0, phi_rf=0.0, wrf_0=1.0E3):
         '''Build effective Floquet matrices and diagonalise to find first
         order corrections
-        Field strength B1, frequency spacing wrf_0, frequency min and
-        max wrf_min, wrf_max, phases and relative direction
-        Returns e_floquet, A{x,y,z}_floquet and rho0{x,y,z}_floquet
+
+        Parameters
+        ----------
+        parameters : Parameters
+            Object containing calculation parameters
+        B1 : (M) array_like or float
+            Field strength in nT. If a scalar is passed, equivalent to
+            np.ones(M)*B1
+        wrf_min : float
+            Minimum frequency of RF band in s^{-1}
+        wrf_max : float
+            Maximum frequency of RF band in s^{-1}
+        phase : (M) array_like or float, optional
+            Phase of the RF components. If a scalar is passed, equivalent
+            to np.ones(M)*phase (Default: 0.0)
+        theta_rf : (M) array_like or float, optional
+            Polar angle of the field vectors of the RF components. If a 
+            scalar is passed, equivalent to np.ones(M)*phase (Default: 0.0)
+        phi_rf : (M) array_like or float, optional
+            Azimuthal angle of the field vectors of the RF components. If a 
+            scalar is passed, equivalent to np.ones(M)*phase (Default: 0.0)
+        wrf_0 : float, optional
+            Frequency spacing in the RF band (Default: 1.0E3
+
+        Returns
+        -------
+        self.{e_floquet, A{x,y,z}_floquet, rho0{x,y,z}_floquet}
+
+        Notes
+        -----
+        The number of frequencies included in the band is determined by
+        nw = int(np.ceil(wrf_max/wrf_0) - np.floor(wrf_min/wrf_0))
 '''
 
         nw = int(np.ceil(wrf_max/wrf_0) - np.floor(wrf_min/wrf_0))
@@ -420,9 +522,27 @@ class FloquetUncoupledSingleFrequency(FloquetUncoupledBroadband):
 '''
 
     def transform(self, B0, theta, phi, B1, theta_rf, phi_rf):
-        '''Transform perturbation Hamiltonian with perturbation strength B1 (nT)
-        and relative direction defined by theta_rf and phi_rf
-        Returns h1 and th1
+        '''Form Hamiltonian for field direction specified by theta and phi 
+        and field strength B0
+
+        Parameters
+        ----------
+        B0 : float
+            External field strength in muT
+        theta : float
+            Polar angle of the external field
+        phi : float
+            Azimuthal angle of the external field
+        B1 : float
+            Strength of perturbation field in nT
+        theta_rf : float
+            Polar angle of perturbation field
+        phi_rf : float
+            Azimuthal angle of perturbation field
+
+        Returns
+        -------
+        self.{h, e, ev, evi, sx, sy, sz, h1, th1}
 '''
         super().transform(B0, theta, phi)
         gamma_e = 1.76E2
@@ -436,7 +556,19 @@ class FloquetUncoupledSingleFrequency(FloquetUncoupledBroadband):
     def floquet_matrices(self, parameters, wrf, phase):
         '''Build effective Floquet matrices and diagonalise to find first
         order corrections
-        Returns e_floquet, A{x,y,z}_floquet and rho0{x,y,z}_floquet
+
+        Parameters
+        ----------
+        parameters : Parameters
+            Object containing calculation parameters
+        wrf : float
+            Frequency of the RF field in s^(-1)
+        phase : float
+            Phase of the RF field
+
+        Returns
+        -------
+        self.{e_floquet, A{x,y,z}_floquet, rho0{x,y,z}_floquet}
 '''
 
         h_floquet, Ax_floquet, Ay_floquet, \
@@ -473,9 +605,38 @@ class FloquetCoupledBroadband(SymmetricCoupled):
                          phase=0.0, theta_rf=0.0, phi_rf=0.0, wrf_0=1.0E3):
         '''Build effective Floquet matrices and diagonalise to find first
         order corrections
-        Field strength B1, frequency spacing wrf_0, frequency min and
-        max wrf_min, wrf_max, phases and relative direction
-        Returns e_floquet, A_floquet and rho0_floquet
+
+        Parameters
+        ----------
+        parameters : Parameters
+            Object containing calculation parameters
+        B1 : (M) array_like or float
+            Field strength in nT. If a scalar is passed, equivalent to
+            np.ones(M)*B1
+        wrf_min : float
+            Minimum frequency of RF band in s^{-1}
+        wrf_max : float
+            Maximum frequency of RF band in s^{-1}
+        phase : (M) array_like or float, optional
+            Phase of the RF components. If a scalar is passed, equivalent
+            to np.ones(M)*phase (Default: 0.0)
+        theta_rf : (M) array_like or float, optional
+            Polar angle of the field vectors of the RF components. If a 
+            scalar is passed, equivalent to np.ones(M)*phase (Default: 0.0)
+        phi_rf : (M) array_like or float, optional
+            Azimuthal angle of the field vectors of the RF components. If a 
+            scalar is passed, equivalent to np.ones(M)*phase (Default: 0.0)
+        wrf_0 : float, optional
+            Frequency spacing in the RF band (Default: 1.0E3
+
+        Returns
+        -------
+        self.{e_floquet, A_floquet, rho0_floquet}
+
+        Notes
+        -----
+        The number of frequencies included in the band is determined by
+        nw = int(np.ceil(wrf_max/wrf_0) - np.floor(wrf_min/wrf_0))
 '''
 
         nw = int(np.ceil(wrf_max/wrf_0) - np.floor(wrf_min/wrf_0))
@@ -524,9 +685,28 @@ class FloquetCoupledSingleFrequency(FloquetCoupledBroadband):
 '''
 
     def transform(self, B0, theta, phi, B1, theta_rf, phi_rf):
-        '''Transform perturbation Hamiltonian with perturbation strength B1 (nT)
-        and relative direction defined by theta_rf and phi_rf
-        Returns h1 and th1
+        '''Form Hamiltonian for field direction specified by theta and phi 
+        and field strength B0
+
+        Parameters
+        ----------
+        B0 : float
+            External field strength in muT
+        theta : float
+            Polar angle of the external field
+        phi : float
+            Azimuthal angle of the external field
+        B1 : float
+            Strength of perturbation field in nT
+        theta_rf : float
+            Polar angle of perturbation field
+        phi_rf : float
+            Azimuthal angle of perturbation field
+
+        Returns
+        -------
+        self.{h, e, ev, evi, sx, sy, sz, tps, tpt, h1, th1}
+        self.{h, e, ev, evi, sx, sy, sz, h1, th1}
 '''
         super().transform(B0, theta, phi)
         gamma_e = 1.76E2
@@ -541,7 +721,19 @@ class FloquetCoupledSingleFrequency(FloquetCoupledBroadband):
     def floquet_matrices(self, parameters, wrf, phase):
         '''Build effective Floquet matrices and diagonalise to find first
         order corrections
-        Returns e_floquet, A_floquet and rho0_floquet
+
+        Parameters
+        ----------
+        parameters : Parameters
+            Object containing calculation parameters
+        wrf : float
+            Frequency of the RF field in s^(-1)
+        phase : float
+            Phase of the RF field
+
+        Returns
+        -------
+        self.{e_floquet, A_floquet, rho0_floquet}
 '''
 
         h_floquet, A_floquet, rho0_floquet \
@@ -619,7 +811,29 @@ class GammaCompute(CombinedHamiltonians):
         self.hB = hB
 
     def transform(self, B0, theta, phi, B1, theta_rf, phi_rf):
-        '''Build separate radical Hamiltonians'''
+        '''Form Hamiltonian for field direction specified by theta and phi 
+        and field strength B0
+
+        Parameters
+        ----------
+        B0 : float
+            External field strength in muT
+        theta : float
+            Polar angle of the external field
+        phi : float
+            Azimuthal angle of the external field
+        B1 : float
+            Strength of perturbation field in nT
+        theta_rf : float
+            Polar angle of perturbation field
+        phi_rf : float
+            Azimuthal angle of perturbation field
+
+        Returns
+        -------
+        self.hA.transform(...)
+        self.hB.transform(...)
+'''
 
         self.hA.transform(B0, theta, phi, B1, theta_rf, phi_rf)
         self.hB.transform(B0, theta, phi, B1, theta_rf, phi_rf)
@@ -628,6 +842,19 @@ class GammaCompute(CombinedHamiltonians):
     def build_propagator(self, parameters, w_rf):
         '''Build separate radical propagators and combine them, and then
         diagonalise the final propagator
+
+        Parameters
+        ----------
+        parameters : Parameters
+            Object containing calculation parameters
+        w_rf : float
+            Frequency of RF field in s^(-1)
+
+        Returns
+        -------
+        self.{tau, propagator, propagatorH, Lambda, X, XT}
+        self.hA.build_propagator(...)
+        self.hb.build_propagator(...)
 '''
 
         self.w_rf = w_rf
@@ -650,7 +877,18 @@ class GammaCompute(CombinedHamiltonians):
         self.XT = np.conj(self.X.T)
 
     def calculate_singlet_yield(self, parameters):
-        '''Define calculation steps'''
+        '''Define calculation steps
+
+        Parameters
+        ----------
+        parameters : Parameters
+            Object containing calculation parameters
+
+        Returns
+        -------
+        PhiS : float
+            Singlet yield
+'''
 
         tps = np.zeros([parameters.nt, self.m, self.m], dtype=complex)
         g_rs = np.zeros([parameters.nt, self.m, self.m], dtype=complex)

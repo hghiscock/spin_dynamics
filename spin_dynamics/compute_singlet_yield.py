@@ -18,11 +18,42 @@ from .singlet_yield import (
 
 def build_hamiltonians(parameters, nA, nB, multiplicitiesA, multiplicitiesB,
                        A_tensorA, A_tensorB):
-    '''Build Hamiltonians for calculation defined by the an instance of
-    the Parameters class, with the two radicals defined by the number of
-    spins (nA, nB), nuclear spin multiplicities (multiplicitiesA, 
-    multiplicitiesB) and hyperfine coupling tensor in millitesla
-    (A_tensorA, A_tensorB)
+    '''Build Hamiltonians for calculation defined by an instance of
+    the Parameters class and the details of the two radicals
+
+    Parameters
+    ----------
+    parameters : Parameters
+        Object containing calculation parameters
+    nA : int
+        Number of spin-active nuclei in radical A
+    nB : int
+        Number of spin-active nuclei in radical B
+    multiplicitiesA : (M) array_like
+        Spin multiplicities of nuclei in radical A
+    multiplicitiesB : (M) array_like
+        Spin multiplicities of nuclei in radical B
+    A_tensorA : (M,3,3) array_like
+        Hyperfine coupling tensors of nuclei in radical A in mT
+    A_tensorB : (M,3,3) array_like
+
+    Returns
+    -------
+    hA : Hamiltonian class object
+        Hamiltonians for radical A (If radical pair is separable)
+    hB : Hamiltonian class object
+        Hamiltonians for radical B (If radical pair is separable)
+    h : Hamiltonian class object
+        Hamiltonians for combined radical pair (If radical pair is not
+        separable)       
+
+    Notes
+    -----
+    A radical pair is not separable if one or more of these applies:
+        The radicals are coupled i.e. non-zero J or D
+        Asymmetric recombination
+        Gamma compute calculation
+        KMC calculation
 '''
     if parameters.calculation_flag == "static":
         if parameters.symmetric_flag:
@@ -84,8 +115,38 @@ def build_hamiltonians(parameters, nA, nB, multiplicitiesA, multiplicitiesB,
 #------------------------------------------------------------------------------#
 
 def compute_singlet_yield(parameters, hA = None, hB = None, h = None):
-    '''Calculate the singlet yield for calculation defined by Parameters instance
-    and Hamiltonians defining the Hilbert space
+    '''Calculate the singlet yield for a radical pair reaction
+
+    Parameters
+    ----------
+    parameters : Parameters
+        Object containing calculation parameters
+    hA : Hamiltonian, optional
+        Hamiltonians of radical A (if radical pair is separable)
+    hB : Hamiltonian, optional
+        Hamiltonians of radical B (if radical pair is separable)
+    h : Hamiltonian, optional
+        Hamiltonians of combined radical pair (if radical pair is not
+        separable)
+
+    Returns
+    -------
+    PhiS : float
+        Singlet yield
+
+    Raises
+    ------
+    You need to transform first!
+        If the Hilbert space(s) hasn't been transformed into the eigenbasis
+    You need to build degenerate blocks!
+        If degenerate subspaces haven't been constructed for the approximate
+        asymmetric calculation
+    You need to build floquet matrices first!
+        If the Floquet matrices haven't been constructed to use the Floquet
+        algorithm
+    You need to construct the propagator first!
+        If the propagator for a time period in a gamma compute calculation
+        hasn't been constructed
 '''
 
     if parameters.calculation_flag == "static":
