@@ -48,6 +48,23 @@ nt : int, optional
 ntrajectories : int, optional
     Number of KMC trajectories to average over (Default: 1000000)
 ```
+## How to define electron-nuclear hyperfine coupling
+For your radical pair, there will be spin active nuclei coupled to the electrons on radicals A and B. You will need an integer of how many nuclei are in each radical, an array containing the spin multiplicities of the nuclei, and another of the hyperfine coupling tensors
+```python
+nA = 1
+mA = np.array([2])
+A_tensorA = np.zeros([1,3,3], dtype=float)
+A_tensorA[0] = np.array([[-0.0636, 0.0, 0.0],
+                         [0.0, -0.0636, 0.0],
+                         [0.0, 0.0, 1.0812]])
+
+nB = 1
+mB = np.array([2])
+A_tensorB = np.zeros([1,3,3], dtype=float)
+A_tensorB[0] = np.array([[-0.0989, 0.0, 0.0],
+                         [0.0, -0.0989, 0.0],
+                         [0.0, 0.0, 1.7569]])
+```
 ## Is the Hamiltonian separable?
 In the next step, we'll build the system Hamiltonians. If the radical pair is separable, the Hilbert spaces for the two radicals will be kept separate and you will keep separate class objects for the two radicals, whereas if not, there will be a single combined set of matrices.  
 
@@ -80,9 +97,9 @@ nA : int
     Number of spin-active nuclei in radical A
 nB : int
     Number of spin-active nuclei in radical B
-multiplicitiesA : (M) array_like
+mA : (M) array_like
     Spin multiplicities of nuclei in radical A
-multiplicitiesB : (M) array_like
+mB : (M) array_like
     Spin multiplicities of nuclei in radical B
 A_tensorA : (M,3,3) array_like
     Hyperfine coupling tensors of nuclei in radical A in mT
