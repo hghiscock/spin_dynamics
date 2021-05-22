@@ -124,6 +124,7 @@ theta : float
 phi : float
     Azimuthal angle of the external field
 ```
+The only exception is for single frequency Floquet calculations
 ```python
 #Single frequency Floquet, separable
 hA.transform(B0, theta, phi, B1, theta_rf, phi_rf)
