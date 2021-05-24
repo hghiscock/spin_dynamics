@@ -49,7 +49,7 @@ ntrajectories : int, optional
     Number of KMC trajectories to average over (Default: 1000000)
 ```
 ## How to define electron-nuclear hyperfine coupling
-For your radical pair, there will be spin active nuclei coupled to the electrons on radicals A and B. You will need an integer of how many nuclei are in each radical, an array containing the spin multiplicities of the nuclei, and another of the hyperfine coupling tensors
+For your radical pair, there will be spin active nuclei coupled to the electrons on radicals A and B. You will need an integer of how many nuclei are in each radical, an array containing the spin multiplicities of the nuclei, and another of the hyperfine coupling tensors. Here are some examples
 ```python
 nA = 1
 mA = np.array([2])
@@ -124,7 +124,7 @@ theta : float
 phi : float
     Azimuthal angle of the external field
 ```
-The only exception is for single frequency Floquet calculations
+The only exception is for single frequency Floquet calculations where we need to transform the perturbation Hamiltonian too
 ```python
 #Single frequency Floquet, separable
 hA.transform(B0, theta, phi, B1, theta_rf, phi_rf)
