@@ -1,4 +1,5 @@
 import numpy as np
+from numba import set_num_threads
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
@@ -100,6 +101,7 @@ class Parameters:
             self.__coupled_flag = True
 
         self.num_threads = num_threads
+        set_num_threads(num_threads)
 
         if self.__calculation_flag == "static":
             self.__approx_flag = approx_flag
