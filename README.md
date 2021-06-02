@@ -1,6 +1,6 @@
 # spin_dynamics
 Python package for calculating the yield of radical pair reactions with either a static or a periodic time dependent external field.  
-Details of the different algorithms used can be found at in my PhD thesis: H. G. Hiscock (2018). _Long-lived spin coherence in radical pair compass magnetoreception_. (University of Oxford)
+Details of the different algorithms used can be found in my PhD thesis: H. G. Hiscock (2018). _Long-lived spin coherence in radical pair compass magnetoreception_. (University of Oxford)
 ### Installation
 Prerequisites:
 - Python 3
