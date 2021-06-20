@@ -146,7 +146,7 @@ theta_rf : float
 phi_rf : float
     Azimuthal angle of perturbation field
 ```
-Another is for wavepacket calculations
+Another is for wavepacket calculations, where we need to include the phase of the time dependent field
 ```python
 hA.transform(B0, theta, phi, B1, theta_rf, phi_rf, phase)                                                
 hB.transform(B0, theta, phi, B1, theta_rf, phi_rf, phase)
