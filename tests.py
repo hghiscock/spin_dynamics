@@ -332,6 +332,31 @@ class TestKMC(unittest.TestCase):
         self.assertTrue(output < 0.36 and output > 0.35, "KMC failed")
                                     
 #-----------------------------------------------------------------------------#
+
+class TestWavepacket(unittest.TestCase):
+
+    global nA, mA, A_tensorA
+    global nB, mB, A_tensorB
+    global B0, theta, phi
+    global B1, theta_rf, phi_rf
+    global w_rf, phase
+
+    def test_sy_calc(self):
+        parameters = spin_dynamics.Parameters(
+                      calculation_flag='wavepacket', kS=1.0E6, kT=1.0E6,
+                      J=0.0, D=0.0, D_epsilon=0.0, num_threads=1)
+        hA, hB = spin_dynamics.build_hamiltonians(
+                  parameters, nA, nB, mA, mB, A_tensorA, A_tensorB)
+        hA.transform(B0, theta, phi, B1, theta_rf, phi_rf, phase)
+        hB.transform(B0, theta, phi, B1, theta_rf, phi_rf, phase)
+
+        output = spin_dynamics.compute_singlet_yield(
+                    parameters, hA=hA, hB=hB, wrf=w_rf, phase=phase)
+
+        self.assertAlmostEqual(output, 0.35472252341183663, 7,
+                               "Wavepacket failed")
+                                    
+#-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
 
 if __name__ == "__main__":
