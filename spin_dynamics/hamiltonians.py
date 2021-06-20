@@ -2,11 +2,15 @@ import numpy as np
 from scipy import sparse 
 from scipy import linalg
 from .singlet_yield import (
-        energy_differences, degeneracy_check, get_indices, perturbation_matrix,
-        sy_asymmetric, single_frequency_build_matrix, bin_frequencies, 
+        degeneracy_check, get_indices, perturbation_matrix,
+        sy_asymmetric, single_frequency_build_matrix,
         single_frequency_build_matrix_combined, broadband_build_matrix,
         broadband_build_matrix_combined, sy_gamma_compute, complexgramschmidt,
         get_omega_rs
+        )
+from .numba_singlet_yield import (
+        bin_frequencies,
+        energy_differences 
         )
 
 #------------------------------------------------------------------------------#
@@ -31,7 +35,7 @@ class Hamiltonians:
 '''
         self.n = nspins
         self.m = 2*np.prod(multiplicities)
-        self.ngaps = 0.5*(self.m*self.m - self.m)
+        self.ngaps = int(0.5*(self.m*self.m - self.m))
 
         if (self.n == 0):
             mmax = 2
@@ -226,11 +230,8 @@ class SymmetricApprox(SymmetricUncoupled):
                                     self.ngaps, self.m, parameters.nlow_bins,
                                     parameters.nhigh_bins, parameters.low_delta,
                                     delta, parameters.divider_bin,
-                                    w_nm, indices, self.sx, self.sy, self.sz,
-                                    parameters.num_threads
+                                    w_nm, indices, self.sx, self.sy, self.sz
                                     )
-
-
 #------------------------------------------------------------------------------#
 
 class SymmetricCoupled(CombinedHamiltonians):
@@ -912,6 +913,60 @@ class GammaCompute(CombinedHamiltonians):
                     )
 
         return np.sum(PhiS) * (4.0/(self.m*parameters.nt**2.0))
+
+#------------------------------------------------------------------------------#
+
+class Wavepacket(Hamiltonians):
+    '''Define Hamiltonians for wavepacket calculation
+'''
+
+    def transform(self, B0, theta, phi, B1, theta_rf, phi_rf, phase):
+        '''Form Hamiltonian for field direction specified by theta and phi 
+        and field strength B0
+
+        Parameters
+        ----------
+        B0 : float
+            External field strength in muT
+        theta : float
+            Polar angle of the external field
+        phi : float
+            Azimuthal angle of the external field
+        B1 : float
+            Strength of perturbation field in nT
+        theta_rf : float
+            Polar angle of perturbation field
+        phi_rf : float
+            Azimuthal angle of perturbation field
+        phase : float
+            Phase of time dependent field
+
+        Returns
+        -------
+        self.{h, h1, p, q, phase}
+'''
+
+        gamma_e = 1.76E5
+        omega_0 = B0*gamma_e
+        self.h = omega_0*((self.hx*np.cos(phi)
+                           + self.hy*np.sin(phi))
+                           * np.sin(theta)
+                           + self.hz*np.cos(theta))\
+                 + self.hhf
+        self.h = self.h.toarray()
+
+        omega_1 = B1*gamma_e*1.0E-3
+        self.h1 = omega_1*((self.hx*np.cos(phi_rf)
+                           + self.hy*np.sin(phi_rf))
+                           * np.sin(theta_rf)
+                           + self.hz*np.cos(theta_rf))
+        self.h1 = self.h1.toarray()
+
+        htd0 = self.h1*np.sin(phase)
+        self.phase = phase
+
+        self.q = np.identity(self.m, dtype=complex)
+        self.p = -1.0j*np.dot((self.h+htd0),self.q)
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#

@@ -1,16 +1,20 @@
 import numpy as np
+from scipy.integrate import simps
 from .hamiltonians import (
         Hamiltonians, CombinedHamiltonians, SymmetricUncoupled,
         SymmetricApprox, SymmetricCoupled, AsymmetricExact,
         AsymmetricApprox, KMC, FloquetUncoupledBroadband,
         FloquetUncoupledSingleFrequency, FloquetCoupledBroadband,
         FloquetCoupledSingleFrequency, GammaComputeSeparate,
-        GammaCompute
+        GammaCompute, Wavepacket
         )
 from .singlet_yield import (
-        bin_frequencies, sy_symmetric_combined, sy_symmetric_separable,
+        bin_frequencies,
         sy_symmetric_approx, sy_symmetric_spincorr, sy_asymmetric,
         sy_floquet, sy_floquet_combined, trajectories
+        )
+from .numba_singlet_yield import (
+        sy_symmetric_combined, sy_symmetric_separable, spincorr_tensor
         )
 
 #------------------------------------------------------------------------------#
@@ -111,10 +115,15 @@ def build_hamiltonians(parameters, nA, nB, multiplicitiesA, multiplicitiesB,
         hB = Hamiltonians(nB, multiplicitiesB, A_tensorB)
         h = KMC(parameters, hA, hB)
         return h
+    elif parameters.calculation_flag == "wavepacket":
+        hA = Wavepacket(nA, multiplicitiesA, A_tensorA)
+        hB = Wavepacket(nB, multiplicitiesB, A_tensorB)
+        return hA, hB
 
 #------------------------------------------------------------------------------#
 
-def compute_singlet_yield(parameters, hA = None, hB = None, h = None):
+def compute_singlet_yield(parameters, hA = None, hB = None, h = None,
+                          wrf = None, phase = None):
     '''Calculate the singlet yield for a radical pair reaction
 
     Parameters
@@ -128,6 +137,10 @@ def compute_singlet_yield(parameters, hA = None, hB = None, h = None):
     h : Hamiltonian, optional
         Hamiltonians of combined radical pair (if radical pair is not
         separable)
+    wrf : float, optional
+        Frequency of time dependent field
+    phase : float, optional
+        Phase of the time dependent field
 
     Returns
     -------
@@ -154,7 +167,7 @@ def compute_singlet_yield(parameters, hA = None, hB = None, h = None):
             if parameters.coupled_flag:
                 if hasattr(h, 'e'):
                     PhiS = sy_symmetric_combined(
-                                h.m, h.e, h.tps, parameters.kS, parameters.num_threads
+                                h.m, h.e, h.tps, parameters.kS
                                 )
                     PhiS = PhiS*4.0/float(h.m)
                 else:
@@ -164,8 +177,7 @@ def compute_singlet_yield(parameters, hA = None, hB = None, h = None):
                     if parameters.approx_flag == "exact":
                         PhiS = sy_symmetric_separable(
                                 hA.m, hB.m, parameters.kS, hA.e, hB.e,
-                                hA.sx, hB.sx, hA.sy, hB.sy, hA.sz, hB.sz,
-                                parameters.num_threads
+                                hA.sx, hB.sx, hA.sy, hB.sy, hA.sz, hB.sz
                                 )
                     elif parameters.approx_flag == "approx":
                         if parameters.kS > 1.0E4:
@@ -254,6 +266,23 @@ def compute_singlet_yield(parameters, hA = None, hB = None, h = None):
            PhiS = PhiS/float(parameters.ntrajectories)
         else:
             raise Exception("You need to transform first!")
+    elif parameters.calculation_flag == "wavepacket":
+        if wrf is not None and phase is not None:
+            if hasattr(hA, 'h1') and hasattr(hB, 'h1'):
+                rabA = spincorr_tensor(hA.m, parameters.nt, parameters.a,
+                                       parameters.b, wrf, phase, hA.q, hA.p, 
+                                       hA.h, hA.h1)
+                rabB = spincorr_tensor(hB.m, parameters.nt, parameters.a,
+                                       parameters.b, wrf, phase, hB.q, hB.p, 
+                                       hB.h, hB.h1)
+                tarray = np.arange(parameters.nt)*parameters.tau
+                pS = np.sum(rabA*rabB, axis=(1,2)) + 0.25
+                pS = pS * (parameters.kS*np.exp(-parameters.kS*tarray))
+                PhiS = simps(pS, dx=parameters.tau)
+            else:
+                raise Exception("You need to transform first!")
+        else:
+            raise Exception("You need to define the RF parameters!")
     return np.real(PhiS)
 
 

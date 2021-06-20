@@ -3,9 +3,10 @@ Python package for calculating the yield of radical pair reactions with either a
 Details of the different algorithms used can be found in my PhD thesis: H. G. Hiscock (2018). _Long-lived spin coherence in radical pair compass magnetoreception_. (University of Oxford)
 ### Installation
 Prerequisites:
-- Python 3
+- Python3
 - numpy
 - scipy
+- numba
 
 To build the package, run:
 ```

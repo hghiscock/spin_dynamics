@@ -1,4 +1,5 @@
 import numpy as np
+from numba import set_num_threads
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
@@ -10,7 +11,7 @@ class Parameters:
     ----------
     calculation_flag : str, optional
         Specify which type of calculation to run. Options are static,
-        floquet, gamma_compute, KMC (Default: static)
+        floquet, gamma_compute, KMC, wavepacket (Default: static)
     kS : float, optional
         Singlet recombination reaction rate (Default: 1.0E6)
     kT : float, optional
@@ -44,6 +45,9 @@ class Parameters:
         calculation (Default: 128)
     ntrajectories : int, optional
         Number of KMC trajectories to average over (Default: 1000000)
+    tau : float, optional
+        Size of timestep in wavepacket calculation in seconds
+        (Default: 5.0E-10)
 
     Returns
     -------
@@ -64,6 +68,10 @@ class Parameters:
         The gamma compute algorithm requires symmetric recombination
     Coupling cannot be included for gamma compute calculation
         J and D must be zero for a gamma compute calculation
+    Symmetric recombination required for wavepacket calculation
+        The wavepacket algorithm requires symmetric recombination
+    Coupling cannot be included for wavepacket calculation
+        J and D must be zero for a wavepacket calculation
     Unrecognised calculation flag
         If the calculation flag is not recognised
 
@@ -80,7 +88,7 @@ class Parameters:
                  approx_flag="exact", epsilon=100,
                  nlow_bins=4000, nhigh_bins=1000,
                  nfrequency_flag="broadband",
-                 nt=128, ntrajectories=1000000):
+                 nt=128, ntrajectories=1000000, tau=5.0E-10):
         '''Initialise parameters
 '''
 
@@ -100,6 +108,7 @@ class Parameters:
             self.__coupled_flag = True
 
         self.num_threads = num_threads
+        set_num_threads(num_threads)
 
         if self.__calculation_flag == "static":
             self.__approx_flag = approx_flag
@@ -136,6 +145,21 @@ class Parameters:
             self.nt = nt
         elif self.__calculation_flag == 'KMC':
             self.ntrajectories = ntrajectories
+        elif self.__calculation_flag == 'wavepacket':
+            if not self.__symmetric_flag:
+                raise Exception(
+                        "Symmetric recombination required for wavepacket calculation")
+            if self.__coupled_flag:
+                raise Exception(
+                        "Coupling cannot be included for wavepacket calculation")
+            self.tau = tau
+            self.T = 10.0/self.kS
+            self.nt = int(self.T/self.tau)
+            rtthree = 1.0/np.sqrt(3.0)
+            self.a = np.array([0.5*(1.0-rtthree)*self.tau, rtthree*self.tau,
+                               -rtthree*self.tau, 0.5*(1.0+rtthree)*self.tau])
+            self.b = np.array([0.0, 0.5*(0.5+rtthree)*self.tau, 0.5*self.tau,
+                               0.5*(0.5-rtthree)*self.tau])
         else:
             raise Exception("Unrecognised calculation flag")
 
