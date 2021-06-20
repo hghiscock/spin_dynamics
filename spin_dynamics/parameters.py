@@ -227,30 +227,3 @@ class Parameters:
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
-
-def readinfile(filename):
-    """Read in singlet yield data from file
-    output theta array and singlet yield array"""
-    input_file = open(filename,'r')
-    data = input_file.readlines()
-
-    try:
-        float(data[-1].split()[0])
-        ntheta = len(data)
-    except IndexError:
-        ntheta = len(data)-1
-
-    theta = np.zeros(ntheta)
-    phis = np.zeros(ntheta)
-
-    for i in range(ntheta):
-        theta[i] = float(data[i].split()[0])
-        phis[i] = float(data[i].split()[1])
-
-    input_file.close()
-
-    return theta, phis
-
-#------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------#
-
