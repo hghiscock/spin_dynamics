@@ -96,4 +96,88 @@ def sy_symmetric_separable(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb):
     return c0
 
 #------------------------------------------------------------------------------#
+
+@jit(Tuple((float64,complex128[:,:],complex128[:,:]))(
+                float64[:],float64[:],float64,float64,complex128[:,:],
+                complex128[:,:],float64,complex128[:,:],complex128[:,:]),
+     nopython=True, cache=True)
+def evolve(a, b, wrf, phase, q, p, t, h, h1):
+    q1 = q + a[0]*p
+    p1 = p
+    t1 = t + a[0]
+    for i in range(1,4):
+        arg = wrf*t1 + phase
+        htmp = h + h1*np.sin(arg)
+        dhdt = wrf*np.cos(arg)*h1
+
+        w = np.dot(htmp,htmp) + 1.0j*dhdt
+        p1 -= b[i]*np.dot(w,q1)
+        q1 += a[i]*p1
+
+        t1 += a[i]
+    return t1, q1, p1
+
+#------------------------------------------------------------------------------#
+
+@jit(float64[:,:](complex128[:,:],int64), nopython=True, parallel=True,
+     cache=True)
+def calc_rab(q, m):
+    rab = np.zeros((3,3), dtype=np.float64)
+
+    rxx = np.complex128(0.0)
+    ryy = np.complex128(0.0)
+    rzz = np.complex128(0.0)
+    rxz = np.complex128(0.0)
+    rzx = np.complex128(0.0)
+    for i in prange(m):
+        iprime = i+m
+        for j in prange(m):
+            jprime = j+m
+            rxx += (np.conj(q[i,jprime])*q[iprime,j] +
+                    np.conj(q[i,j])*q[iprime,jprime])
+
+            ryy += (np.conj(q[iprime,jprime])*q[i,j] - 
+                    np.conj(q[iprime,j])*q[i,jprime])
+
+            rzz += (np.conj(q[i,j])*q[i,j] + 
+                    np.conj(q[iprime,jprime])*q[iprime,jprime] - 
+                    np.conj(q[i,jprime])*q[i,jprime] - 
+                    np.conj(q[iprime,j])*q[iprime,j])
+
+            rxz += (np.conj(q[i,jprime])*q[i,j] - 
+                    np.conj(q[iprime,jprime])*q[iprime,j])
+
+            rzx += (np.conj(q[i,j])*q[iprime,j] -
+                    np.conj(q[i,jprime])*q[iprime,jprime])
+
+    rab[0,0] = np.real(rxx)
+    rab[1,1] = np.real(ryy)
+    rab[2,2] = np.real(rzz)/2.0
+    rab[0,1] = np.imag(rxx)
+    rab[1,0] = np.imag(ryy)
+    rab[0,2] = np.real(rxz)
+    rab[2,0] = np.real(rzx)
+    rab[1,2] = np.imag(rxz)
+    rab[2,1] = np.imag(rzx)
+
+    return rab
+
+#------------------------------------------------------------------------------#
+
+@jit(float64[:,:,:](int64,int64,float64[:],float64[:],float64,float64,
+                    complex128[:,:],complex128[:,:],complex128[:,:],
+                    complex128[:,:]),
+     nopython=True, cache=True)
+def spincorr_tensor(m, nt, a, b, wrf, phase, q0, p0, h, h1):
+    t = 0
+    q = q0
+    p = p0
+    rab = np.zeros((nt,3,3), dtype=np.float64)
+    for i in range(nt):
+        t, q, p = evolve(a, b, wrf, phase, q, p, t, h, h1)
+        rab[i] = calc_rab(q, m/2)
+    rab = rab / m
+    return rab
+
+#------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
