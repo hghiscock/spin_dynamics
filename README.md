@@ -2,9 +2,10 @@
 Python package for calculating the yield of radical pair reactions with either a static or a periodic time dependent external field.
 ### Installation
 Prerequisites:
-- Python 3
+- Python3
 - numpy
 - scipy
+- numba
 
 To build the package, run:
 ```
