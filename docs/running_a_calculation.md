@@ -7,13 +7,14 @@ parameters = spin_dynamics.Parameters(
                  approx_flag="exact", epsilon=100,
                  nlow_bins=4000, nhigh_bins=1000,
                  nfrequency_flag="broadband",
-                 nt=128, ntrajectories=1000000
+                 nt=128, ntrajectories=1000000,
+                 tau=5.0E-10
                  )
 ```
 ```
 calculation_flag : str, optional  
     Specify which type of calculation to run. Options are static,  
-    floquet, gamma_compute, KMC (Default: static)  
+    floquet, gamma_compute, KMC, wavepacket (Default: static)  
 kS : float, optional
     Singlet recombination reaction rate (Default: 1.0E6)
 kT : float, optional
@@ -47,6 +48,9 @@ nt : int, optional
     calculation (Default: 128)
 ntrajectories : int, optional
     Number of KMC trajectories to average over (Default: 1000000)
+tau : float, optional
+    Size of timestep in wavepacket calculation in seconds
+    (Default: 5.0E-10)
 ```
 ## How to define electron-nuclear hyperfine coupling
 For your radical pair, there will be spin active nuclei coupled to the electrons on radicals A and B. You will need an integer of how many nuclei are in each radical, an array containing the spin multiplicities of the nuclei, and another of the hyperfine coupling tensors. Here are some examples
@@ -124,7 +128,7 @@ theta : float
 phi : float
     Azimuthal angle of the external field
 ```
-The only exception is for single frequency Floquet calculations where we need to transform the perturbation Hamiltonian too
+One exception is for single frequency Floquet calculations where we need to transform the perturbation Hamiltonian too
 ```python
 #Single frequency Floquet, separable
 hA.transform(B0, theta, phi, B1, theta_rf, phi_rf)
@@ -141,6 +145,15 @@ theta_rf : float
     Polar angle of perturbation field
 phi_rf : float
     Azimuthal angle of perturbation field
+```
+Another is for wavepacket calculations
+```python
+hA.transform(B0, theta, phi, B1, theta_rf, phi_rf, phase)                                                
+hB.transform(B0, theta, phi, B1, theta_rf, phi_rf, phase)
+```
+```
+phase : float
+  Phase of time dependent field
 ```
 ## Additional steps
 Depending on the type of calculation you're doing, there may be an additional step required before we can compute the singlet yield
@@ -214,8 +227,8 @@ spin_dynamics.compute_singlet_yield(parameters, hA = hA, hB = hB)
 #Not separable
 spin_dynamics.compute_singlet_yield(parameters, h = h)
 ```
+The only exception is for wavepacket calculations
+```python
+spin_dynamics.compute_singlet_yield(parameters, hA = hA, hB = hB, wrf=wrf, phase=phase
+```
 and we've calculated the singlet yield for your radical pair!
-
-
-
-
