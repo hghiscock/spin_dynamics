@@ -229,6 +229,6 @@ spin_dynamics.compute_singlet_yield(parameters, h = h)
 ```
 The only exception is for wavepacket calculations
 ```python
-spin_dynamics.compute_singlet_yield(parameters, hA = hA, hB = hB, wrf=wrf, phase=phase
+spin_dynamics.compute_singlet_yield(parameters, hA = hA, hB = hB, wrf=wrf, phase=phase)
 ```
 and we've calculated the singlet yield for your radical pair!
