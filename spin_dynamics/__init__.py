@@ -18,7 +18,7 @@ from .singlet_yield import (
 from .numba_singlet_yield import (
         bin_frequencies, energy_differences,
         sy_symmetric_combined, sy_symmetric_separable,
-        spincorr_tensor
+        spincorr_tensor, gpu_sy_separable
         )
 from .compute_singlet_yield import build_hamiltonians
 from .compute_singlet_yield import compute_singlet_yield
