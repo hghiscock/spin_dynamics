@@ -220,7 +220,7 @@ phi_rf : (M) array_like or float, optional
     Azimuthal angle of the field vectors of the RF components. If a 
     scalar is passed, equivalent to np.ones(M)*phase (Default: 0.0)
 wrf_0 : float, optional
-    Frequency spacing in the RF band (Default: 1.0E3
+    Frequency spacing in the RF band (Default: 1.0E3)
 ```
 ## Calculating the singlet yield
 Now we're ready to calculate the singlet yield which is different if the radical pair is separable or not
