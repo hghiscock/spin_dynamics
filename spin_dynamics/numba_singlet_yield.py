@@ -1,7 +1,8 @@
-from numba import jit, prange
+from numba import cuda, jit, prange
 from numba import complex128, float64, int64
 from numba.types import Tuple
 import numpy as np
+TPB=16
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
@@ -94,6 +95,90 @@ def sy_symmetric_separable(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb):
                     ps=sxa[i,j]*sxb[m,l]+sya[i,j]*syb[m,l]+sza[i,j]*szb[m,l]
                     c0 += k/de*ps*np.conj(ps)
     return c0
+
+#------------------------------------------------------------------------------#
+
+@cuda.jit
+def fast_sy_separable(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb, c0):
+    i,j = cuda.grid(2)
+    tx = cuda.threadIdx.x
+    ty = cuda.threadIdx.y
+
+    if i>=ma or j>=ma:
+        return
+
+    ssxa = sxa[i,j]
+    ssya = sya[i,j]
+    ssza = sza[i,j]
+    sdea = ea[i]-ea[j]
+
+    ssxb = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
+    ssyb = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
+    sszb = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
+    sebx = cuda.shared.array(shape=(TPB), dtype=np.float64)
+    seby = cuda.shared.array(shape=(TPB), dtype=np.float64)
+
+    tmp = 0.0 + 0.0j
+    for i2 in range(mb/TPB):
+        sebx[tx] = eb[tx + i2*TPB]
+        for j2 in range(mb/TPB):
+            seby[ty] = eb[ty + j2*TPB]
+            ssxb[tx,ty] = sxb[tx + i2*TPB,ty + j2*TPB]
+            ssyb[tx,ty] = syb[tx + i2*TPB,ty + j2*TPB]
+            sszb[tx,ty] = szb[tx + i2*TPB,ty + j2*TPB]
+
+            cuda.syncthreads()
+
+            for m in range(TPB):
+                for l in range(TPB):
+                    de = k+1.0j*(sdea+sebx[m]-seby[l])
+                    ps=ssxa*ssxb[m,l]+ssya*ssyb[m,l]+ssza*sszb[m,l]
+                    tmp += (k/de)*ps*ps.conjugate()
+
+            cuda.syncthreads()
+
+    c0[i,j] = tmp
+
+#------------------------------------------------------------------------------#
+
+@cuda.jit
+def sy_sep_test(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb, c0):
+    i,j = cuda.grid(2)
+    ssxa = sxa[i,j]
+    ssya = sya[i,j]
+    ssza = sza[i,j]
+    sdea = ea[i]-ea[j]
+
+    if i < ma and j < ma:
+        c0[i,j] = 0.0 + 0.0j
+        for m in range(mb):
+            for l in range(mb):
+                de = k+1.0j*(sdea+eb[m]-eb[l])
+                ps=ssxa*sxb[m,l]+ssya*syb[m,l]+ssza*szb[m,l]
+                c0[i,j] += (k/de)*ps*ps.conjugate()
+
+#------------------------------------------------------------------------------#
+
+def gpu_sy_separable(parameters, hA, hB):
+    threadsperblock = (TPB, TPB)
+    BPG = int(hB.m / TPB)
+    blockspergrid = (BPG, BPG)
+    sxa = cuda.to_device(hA.sx)
+    sya = cuda.to_device(hA.sy)
+    sza = cuda.to_device(hA.sz)
+    sxb = cuda.to_device(hB.sx)
+    syb = cuda.to_device(hB.sy)
+    szb = cuda.to_device(hB.sz)
+    ea = cuda.to_device(hA.e)
+    eb = cuda.to_device(hB.e)
+    c0 = cuda.device_array((hA.m,hA.m),dtype=np.complex128)
+
+    fast_sy_separable[blockspergrid, threadsperblock](
+            hA.m, hB.m, parameters.kS, 
+            ea, eb, sxa, sxb, sya, syb, sza, szb, c0
+            )
+    c0mat = c0.copy_to_host()
+    return np.real(np.sum(c0mat))
 
 #------------------------------------------------------------------------------#
 
