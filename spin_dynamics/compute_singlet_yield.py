@@ -14,7 +14,8 @@ from .singlet_yield import (
         sy_floquet, sy_floquet_combined, trajectories
         )
 from .numba_singlet_yield import (
-        sy_symmetric_combined, sy_symmetric_separable, spincorr_tensor
+        sy_symmetric_combined, sy_symmetric_separable, spincorr_tensor,
+        gpu_sy_separable
         )
 
 #------------------------------------------------------------------------------#
@@ -175,10 +176,13 @@ def compute_singlet_yield(parameters, hA = None, hB = None, h = None,
             else:
                 if hasattr(hA, 'e') and hasattr(hB, 'e'):
                     if parameters.approx_flag == "exact":
-                        PhiS = sy_symmetric_separable(
-                                hA.m, hB.m, parameters.kS, hA.e, hB.e,
-                                hA.sx, hB.sx, hA.sy, hB.sy, hA.sz, hB.sz
-                                )
+                        if parameters.gpu_flag:
+                            PhiS = gpu_sy_separable(parameters, hA, hB)
+                        else:
+                            PhiS = sy_symmetric_separable(
+                                    hA.m, hB.m, parameters.kS, hA.e, hB.e,
+                                    hA.sx, hB.sx, hA.sy, hB.sy, hA.sz, hB.sz
+                                    )
                     elif parameters.approx_flag == "approx":
                         if parameters.kS > 1.0E4:
                             hA.bin_frequencies(parameters)

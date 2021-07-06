@@ -1,5 +1,6 @@
 import numpy as np
 from numba import set_num_threads
+from numba import cuda
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
@@ -48,6 +49,10 @@ class Parameters:
     tau : float, optional
         Size of timestep in wavepacket calculation in seconds
         (Default: 5.0E-10)
+    gpu_flag : boolean, optional
+        Allow use of CUDA enabled GPU. Note, this is currently only 
+        implemented for Symmetric, Exact, Separable calculations (Default:
+        False)
 
     Returns
     -------
@@ -74,6 +79,9 @@ class Parameters:
         J and D must be zero for a wavepacket calculation
     Unrecognised calculation flag
         If the calculation flag is not recognised
+    No CUDA GPU available
+        If numba is unable to detect a GPU, which may also rely
+        on having the correct drivers and CUDA installed
 
     Notes
     -----
@@ -88,7 +96,8 @@ class Parameters:
                  approx_flag="exact", epsilon=100,
                  nlow_bins=4000, nhigh_bins=1000,
                  nfrequency_flag="broadband",
-                 nt=128, ntrajectories=1000000, tau=5.0E-10):
+                 nt=128, ntrajectories=1000000, tau=5.0E-10,
+                 gpu_flag=False):
         '''Initialise parameters
 '''
 
@@ -109,6 +118,13 @@ class Parameters:
 
         self.num_threads = num_threads
         set_num_threads(num_threads)
+
+        self.__gpu_flag = gpu_flag
+        if gpu_flag:
+            try:
+                cuda.gpus
+            except:
+                raise Exception("No CUDA GPU available")
 
         if self.__calculation_flag == "static":
             self.__approx_flag = approx_flag
@@ -224,6 +240,10 @@ class Parameters:
     @property
     def nfrequency_flag(self):
         return self.__nfrequency_flag
+
+    @property
+    def gpu_flag(self):
+        return self.__gpu_flag
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
