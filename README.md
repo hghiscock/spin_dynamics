@@ -8,6 +8,7 @@ Prerequisites:
 - scipy
 - numba
 - (CUDA if using a GPU)
+
 To build the package, run:
 ```
 python setup.py build
