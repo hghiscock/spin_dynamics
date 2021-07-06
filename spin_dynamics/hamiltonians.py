@@ -459,7 +459,7 @@ class FloquetUncoupledBroadband(SymmetricUncoupled):
             Azimuthal angle of the field vectors of the RF components. If a 
             scalar is passed, equivalent to np.ones(M)*phase (Default: 0.0)
         wrf_0 : float, optional
-            Frequency spacing in the RF band (Default: 1.0E3
+            Frequency spacing in the RF band (Default: 1.0E3)
 
         Returns
         -------
@@ -628,7 +628,7 @@ class FloquetCoupledBroadband(SymmetricCoupled):
             Azimuthal angle of the field vectors of the RF components. If a 
             scalar is passed, equivalent to np.ones(M)*phase (Default: 0.0)
         wrf_0 : float, optional
-            Frequency spacing in the RF band (Default: 1.0E3
+            Frequency spacing in the RF band (Default: 1.0E3)
 
         Returns
         -------
