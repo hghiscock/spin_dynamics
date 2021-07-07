@@ -142,7 +142,7 @@ def fast_sy_separable(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb, c0):
 #------------------------------------------------------------------------------#
 
 @cuda.jit
-def sy_sep_test(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb, c0):
+def simple_gpu_sy_separable(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb, c0):
     i,j = cuda.grid(2)
     ssxa = sxa[i,j]
     ssya = sya[i,j]
