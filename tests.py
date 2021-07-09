@@ -357,6 +357,56 @@ class TestWavepacket(unittest.TestCase):
                                "Wavepacket failed")
                                     
 #-----------------------------------------------------------------------------#
+#---------       Run GPU tests if CUDA enabled GPU available        ----------#
+#-----------------------------------------------------------------------------#
+
+try:
+    cuda.gpus
+
+    #Radical parameters for GPU test
+    nA1 = 5
+    mA1 = np.array([2,2,2,2,2])
+    A_tensorA1 = np.zeros([5,3,3], dtype=float)
+    A_tensorA1[0] = A_tensorA[0]
+    A_tensorA1[1] = A_tensorA[0]
+    A_tensorA1[2] = A_tensorA[0]
+    A_tensorA1[3] = A_tensorA[0]
+    A_tensorA1[4] = A_tensorA[0]
+
+    nB1 = 5
+    mB1 = np.array([2,2,2,2,2])
+    A_tensorB1 = np.zeros([5,3,3], dtype=float)
+    A_tensorB1[0] = A_tensorB[0]
+    A_tensorB1[1] = A_tensorB[0]
+    A_tensorB1[2] = A_tensorB[0]
+    A_tensorB1[3] = A_tensorB[0]
+    A_tensorB1[4] = A_tensorB[0]
+
+    class TestSymmetricUncoupledExactGPU(unittest.TestCase):
+
+        global nA, mA, A_tensorA
+        global nB, mB, A_tensorB
+        global B0, theta, phi
+
+        def test_sy_calc(self):
+            parameters = spin_dynamics.Parameters(
+                          calculation_flag="static", kS=1.0E6, kT=1.0E6,
+                          J=0.0, D=0.0, D_epsilon=0.0, num_threads=12,
+                          approx_flag="exact", gpu_flag=True)
+            hA, hB = spin_dynamics.build_hamiltonians(
+                      parameters, nA1, nB1, mA1, mB1, A_tensorA1, A_tensorB1)
+            hA.transform(B0, theta, phi)
+            hB.transform(B0, theta, phi)
+
+            output = spin_dynamics.compute_singlet_yield(parameters, hA=hA, hB=hB)
+
+            self.assertAlmostEqual(output, 0.388335592180034, 7,
+                                   "Symmetric Uncoupled Exact GPU failed")
+
+except:
+    pass
+
+#-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
 
 if __name__ == "__main__":
