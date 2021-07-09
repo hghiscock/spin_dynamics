@@ -215,7 +215,7 @@ def simple_gpu_sy_separable(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb, c0)
 
 def gpu_sy_separable(parameters, hA, hB):
     threadsperblock = (TPB, TPB)
-    BPG = int(hB.m / TPB)
+    BPG = int(hA.m / TPB)
     blockspergrid = (BPG, BPG)
     sxa = cuda.to_device(hA.sx)
     sya = cuda.to_device(hA.sy)
@@ -238,7 +238,7 @@ def gpu_sy_separable(parameters, hA, hB):
 
 def gpu_sy_floquet(parameters, hA, hB):
     threadsperblock = (TPB, TPB)
-    BPG = int(hB.m / TPB)
+    BPG = int(hA.m / TPB)
     blockspergrid = (BPG, BPG)
     AxA = cuda.to_device(hA.Ax_floquet)
     AyA = cuda.to_device(hA.Ay_floquet)
