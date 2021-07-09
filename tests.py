@@ -404,6 +404,33 @@ try:
             self.assertAlmostEqual(output, 0.388335592180034, 7,
                                    "Symmetric Uncoupled Exact GPU failed")
 
+    class TestFloquetUncoupledSingleFrequencyGPU(unittest.TestCase):
+
+        global nA, mA, A_tensorA
+        global nB, mB, A_tensorB
+        global B0, theta, phi
+        global B1, theta_rf, phi_rf
+        global w_rf, phase
+
+        def test_sy_calc(self):
+            parameters = spin_dynamics.Parameters(
+                          calculation_flag='floquet', kS=1.0E3, kT=1.0E3,
+                          J=0.0, D=0.0, D_epsilon=0.0, num_threads=1,
+                          epsilon=epsilon, nfrequency_flag='single_frequency',
+                          gpu_flag=True)
+            hA, hB = spin_dynamics.build_hamiltonians(
+                      parameters, nA1, nB1, mA1, mB1, A_tensorA1, A_tensorB1)
+            hA.transform(B0, theta, phi, B1, theta_rf, phi_rf)
+            hB.transform(B0, theta, phi, B1, theta_rf, phi_rf)
+
+            hA.floquet_matrices(parameters, w_rf, phase)
+            hB.floquet_matrices(parameters, w_rf, phase)
+
+            output = spin_dynamics.compute_singlet_yield(parameters, hA=hA, hB=hB)
+    
+            self.assertAlmostEqual(output, 0.38771746823315695, 7,
+                                   "Floquet Uncoupled Single Frequency failed")
+                                    
 except:
     pass
 

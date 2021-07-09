@@ -15,7 +15,7 @@ from .singlet_yield import (
         )
 from .numba_singlet_yield import (
         sy_symmetric_combined, sy_symmetric_separable, spincorr_tensor,
-        gpu_sy_separable
+        gpu_sy_separable, gpu_sy_floquet
         )
 
 #------------------------------------------------------------------------------#
@@ -237,15 +237,18 @@ def compute_singlet_yield(parameters, hA = None, hB = None, h = None,
         else:
             if hasattr(hA, 'e') and hasattr(hB, 'e'):
                 if hasattr(hA, 'e_floquet') and hasattr(hA, 'e_floquet'):
-                    PhiS = sy_floquet(
-                            hA.m, hB.m, parameters.kS, hA.e_floquet,
-                            hB.e_floquet, hA.Ax_floquet, hB.Ax_floquet,
-                            hA.Ay_floquet, hB.Ay_floquet, hA.Az_floquet,
-                            hB.Az_floquet, hA.rho0x_floquet, hB.rho0x_floquet,
-                            hA.rho0y_floquet, hB.rho0y_floquet,
-                            hA.rho0z_floquet, hB.rho0z_floquet,
-                            parameters.num_threads
-                            )
+                    if parameters.gpu_flag:
+                        PhiS = gpu_sy_floquet(parameters, hA, hB)
+                    else:
+                        PhiS = sy_floquet(
+                                hA.m, hB.m, parameters.kS, hA.e_floquet,
+                                hB.e_floquet, hA.Ax_floquet, hB.Ax_floquet,
+                                hA.Ay_floquet, hB.Ay_floquet, hA.Az_floquet,
+                                hB.Az_floquet, hA.rho0x_floquet, hB.rho0x_floquet,
+                                hA.rho0y_floquet, hB.rho0y_floquet,
+                                hA.rho0z_floquet, hB.rho0z_floquet,
+                                parameters.num_threads
+                                )
                     PhiS = PhiS*4.0/float(hA.m*hB.m) + 0.25
                 else:
                     raise Exception(
