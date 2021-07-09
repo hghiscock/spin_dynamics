@@ -89,4 +89,4 @@ print(compute_singlet_yield(parameters, h=h))
 ```
 In contrast to the previous example, with a non-separable Hilbert space the function `build_hamiltonians` outputs a single class object representing the combined Hilbert space. The `transform` function also takes additional arguments to define the time-dependent field. There is an additional function call `floquet_matrices` which constructs the matrices used in the Floquet algoriothm to compute the singlet yield.
  
-The file `tests.py` contains unit tests for each possible type of calculation using this package, which serves as a useful template for all the configurations of different parameters that lead to different computations. The file `gpu_tests.py` contains unit tests for the GPU-accelerated calculations.
+The file `tests.py` contains unit tests for each possible type of calculation using this package, which serves as a useful template for all the configurations of different parameters that lead to different computations.

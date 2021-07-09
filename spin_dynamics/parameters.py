@@ -51,8 +51,8 @@ class Parameters:
         (Default: 5.0E-10)
     gpu_flag : boolean, optional
         Allow use of CUDA enabled GPU. Note, this is currently only 
-        implemented for Symmetric, Exact, Separable calculations (Default:
-        False)
+        implemented for Symmetric, Exact, Separable and Uncoupled
+        Floquet calculations (Default: False)
 
     Returns
     -------

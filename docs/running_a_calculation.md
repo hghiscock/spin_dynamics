@@ -53,8 +53,8 @@ tau : float, optional
     (Default: 5.0E-10)
 gpu_flag : boolean, optional
     Allow use of CUDA enabled GPU. Note, this is currently only 
-    implemented for Symmetric, Exact, Separable calculations (Default:
-    False)
+    implemented for Symmetric, Exact, Separable and Uncoupled
+    Floquet calculations (Default: False)
 ```
 ## How to define electron-nuclear hyperfine coupling
 For your radical pair, there will be spin active nuclei coupled to the electrons on radicals A and B. You will need an integer of how many nuclei are in each radical, an array containing the spin multiplicities of the nuclei, and another of the hyperfine coupling tensors. Here are some examples
