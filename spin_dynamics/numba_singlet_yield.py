@@ -142,6 +142,60 @@ def fast_sy_separable(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb, c0):
 #------------------------------------------------------------------------------#
 
 @cuda.jit
+def fast_sy_floquet(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb, 
+                    sxa1, sxb1, sya1, syb1, sza1, szb1, c0):
+    i,j = cuda.grid(2)
+    tx = cuda.threadIdx.x
+    ty = cuda.threadIdx.y
+
+    if i>=ma or j>=ma:
+        return
+
+    ssxa = sxa[i,j]
+    ssya = sya[i,j]
+    ssza = sza[i,j]
+    ssxa1 = sxa1[j,i]
+    ssya1 = sya1[j,i]
+    ssza1 = sza1[j,i]
+    sdea = ea[i]-ea[j]
+
+    ssxb = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
+    ssyb = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
+    sszb = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
+    ssxb1 = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
+    ssyb1 = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
+    sszb1 = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
+    sebx = cuda.shared.array(shape=(TPB), dtype=np.float64)
+    seby = cuda.shared.array(shape=(TPB), dtype=np.float64)
+
+    tmp = 0.0 + 0.0j
+    for i2 in range(mb/TPB):
+        sebx[tx] = eb[tx + i2*TPB]
+        for j2 in range(mb/TPB):
+            seby[ty] = eb[ty + j2*TPB]
+            ssxb[tx,ty] = sxb[tx + i2*TPB,ty + j2*TPB]
+            ssyb[tx,ty] = syb[tx + i2*TPB,ty + j2*TPB]
+            sszb[tx,ty] = szb[tx + i2*TPB,ty + j2*TPB]
+            ssxb1[tx,ty] = sxb1[tx + i2*TPB,ty + j2*TPB]
+            ssyb1[tx,ty] = syb1[tx + i2*TPB,ty + j2*TPB]
+            sszb1[tx,ty] = szb1[tx + i2*TPB,ty + j2*TPB]
+
+            cuda.syncthreads()
+
+            for m in range(TPB):
+                for l in range(TPB):
+                    de = k+1.0j*(sdea+sebx[m]-seby[l])
+                    ps=ssxa*ssxb[m,l]+ssya*ssyb[m,l]+ssza*sszb[m,l]
+                    ps1=ssxa1*ssxb1[l,m]+ssya1*ssyb1[l,m]+ssza1*sszb1[l,m]
+                    tmp += (k/de)*ps*ps1
+
+            cuda.syncthreads()
+
+    c0[i,j] = tmp
+
+#------------------------------------------------------------------------------#
+
+@cuda.jit
 def simple_gpu_sy_separable(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb, c0):
     i,j = cuda.grid(2)
     ssxa = sxa[i,j]
@@ -176,6 +230,37 @@ def gpu_sy_separable(parameters, hA, hB):
     fast_sy_separable[blockspergrid, threadsperblock](
             hA.m, hB.m, parameters.kS, 
             ea, eb, sxa, sxb, sya, syb, sza, szb, c0
+            )
+    c0mat = c0.copy_to_host()
+    return np.real(np.sum(c0mat))
+
+#------------------------------------------------------------------------------#
+
+def gpu_sy_floquet(parameters, hA, hB):
+    threadsperblock = (TPB, TPB)
+    BPG = int(hB.m / TPB)
+    blockspergrid = (BPG, BPG)
+    AxA = cuda.to_device(hA.Ax_floquet)
+    AyA = cuda.to_device(hA.Ay_floquet)
+    AzA = cuda.to_device(hA.Az_floquet)
+    AxB = cuda.to_device(hB.Ax_floquet)
+    AyB = cuda.to_device(hB.Ay_floquet)
+    AzB = cuda.to_device(hB.Az_floquet)
+    rho0xA = cuda.to_device(hA.rho0x_floquet)
+    rho0yA = cuda.to_device(hA.rho0y_floquet)
+    rho0zA = cuda.to_device(hA.rho0z_floquet)
+    rho0xB = cuda.to_device(hB.rho0x_floquet)
+    rho0yB = cuda.to_device(hB.rho0y_floquet)
+    rho0zB = cuda.to_device(hB.rho0z_floquet)
+    ea = cuda.to_device(hA.e_floquet)
+    eb = cuda.to_device(hB.e_floquet)
+    c0 = cuda.device_array((hA.m,hA.m),dtype=np.complex128)
+
+    fast_sy_floquet[blockspergrid, threadsperblock](
+            hA.m, hB.m, parameters.kS, 
+            ea, eb, AxA, AxB, AyA, AyB, AzA, AzB,
+            rho0xA, rho0xB, rho0yA, rho0yB, rho0zA, rho0zB,
+            c0
             )
     c0mat = c0.copy_to_host()
     return np.real(np.sum(c0mat))
