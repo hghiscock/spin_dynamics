@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import spin_dynamics
 from numba import cuda
-#test commit
+
 #-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
 
