@@ -358,6 +358,21 @@ class TestWavepacket(unittest.TestCase):
                                "Wavepacket failed")
                                     
 #-----------------------------------------------------------------------------#
+
+class TestHeadingAccuracy(unittest.TestCase):
+
+    def test_heading_accuracy_calc(self):
+        angles, sy_values = spin_dynamics.load_test_data()
+        retina_signal = spin_dynamics.RetinaSignal(40, angles, sy_values)
+
+        heading_accuracy = spin_dynamics.HeadingAccuracy(retina_signal, 1000)
+        output = heading_accuracy.lower_bound_error(
+                retina_signal, 1.0E6, num_threads=12)
+
+        self.assertTrue(output < 0.95 and output > 0.85, 
+                        "Heading Accuracy calculation failed")
+
+#-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
 
 if __name__ == "__main__":

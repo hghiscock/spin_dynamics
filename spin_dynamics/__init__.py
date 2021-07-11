@@ -22,3 +22,4 @@ from .numba_singlet_yield import (
         )
 from .compute_singlet_yield import build_hamiltonians
 from .compute_singlet_yield import compute_singlet_yield
+from .lower_bound_error import load_test_data, RetinaSignal, HeadingAccuracy  
