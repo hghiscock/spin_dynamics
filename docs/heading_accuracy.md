@@ -4,7 +4,8 @@ In order to calculate the lower bound of the heading error for a given radical p
 retina_signal = spin_dynamics.RetinaSignal(
 			receptor_grid, angles, sy_values,
 	                beta = 0.5*np.pi, gamma = 0.0, eta = 0.5*np.pi,
-           	        inclination = np.pi*11/30):
+           	        inclination = np.pi*11/30
+			)
 ```
 ```
 receptor_grid : int
