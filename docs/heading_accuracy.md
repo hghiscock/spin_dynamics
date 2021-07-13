@@ -61,7 +61,8 @@ Once this is all constructed, we can calculate the lower bound error for any num
 ```python
 heading_error = heading_accuracy.lower_bound_error(
 			self, retina_signal,
-			ntrajectories, num_threads=1
+			ntrajectories, num_threads=1,
+			gpu_flag=False
 			)
 ```
 ```
@@ -74,4 +75,6 @@ ntrajectories : int
 num_threads : int, optional
     Number of threads to use in building the covariance matrix (Default:
     1)
+gpu_flag : bool, optional
+    Allow use of CUDA enabled GPU (Default: False)
 ```
