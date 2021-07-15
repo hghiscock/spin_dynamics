@@ -358,6 +358,7 @@ class TestWavepacket(unittest.TestCase):
                                "Wavepacket failed")
                                     
 #-----------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------#
 
 class TestHeadingAccuracy(unittest.TestCase):
 
