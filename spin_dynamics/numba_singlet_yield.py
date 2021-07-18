@@ -112,16 +112,17 @@ def fast_sy_separable(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb, c0):
     ssza = sza[i,j]
     sdea = ea[i]-ea[j]
 
-    ssxb = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
-    ssyb = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
-    sszb = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
-    sebx = cuda.shared.array(shape=(TPB), dtype=np.float64)
-    seby = cuda.shared.array(shape=(TPB), dtype=np.float64)
+    ssxb = cuda.shared.array(shape=(TPB,TPB), dtype=complex128)
+    ssyb = cuda.shared.array(shape=(TPB,TPB), dtype=complex128)
+    sszb = cuda.shared.array(shape=(TPB,TPB), dtype=complex128)
+    sebx = cuda.shared.array(shape=(TPB), dtype=float64)
+    seby = cuda.shared.array(shape=(TPB), dtype=float64)
 
     tmp = 0.0 + 0.0j
-    for i2 in range(mb/TPB):
+    mbt = int(mb/TPB)
+    for i2 in range(mbt):
         sebx[tx] = eb[tx + i2*TPB]
-        for j2 in range(mb/TPB):
+        for j2 in range(mbt):
             seby[ty] = eb[ty + j2*TPB]
             ssxb[tx,ty] = sxb[tx + i2*TPB,ty + j2*TPB]
             ssyb[tx,ty] = syb[tx + i2*TPB,ty + j2*TPB]
@@ -159,19 +160,20 @@ def fast_sy_floquet(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb,
     ssza1 = sza1[j,i]
     sdea = ea[i]-ea[j]
 
-    ssxb = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
-    ssyb = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
-    sszb = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
-    ssxb1 = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
-    ssyb1 = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
-    sszb1 = cuda.shared.array(shape=(TPB,TPB), dtype=np.complex128)
-    sebx = cuda.shared.array(shape=(TPB), dtype=np.float64)
-    seby = cuda.shared.array(shape=(TPB), dtype=np.float64)
+    ssxb = cuda.shared.array(shape=(TPB,TPB), dtype=complex128)
+    ssyb = cuda.shared.array(shape=(TPB,TPB), dtype=complex128)
+    sszb = cuda.shared.array(shape=(TPB,TPB), dtype=complex128)
+    ssxb1 = cuda.shared.array(shape=(TPB,TPB), dtype=complex128)
+    ssyb1 = cuda.shared.array(shape=(TPB,TPB), dtype=complex128)
+    sszb1 = cuda.shared.array(shape=(TPB,TPB), dtype=complex128)
+    sebx = cuda.shared.array(shape=(TPB), dtype=float64)
+    seby = cuda.shared.array(shape=(TPB), dtype=float64)
 
     tmp = 0.0 + 0.0j
-    for i2 in range(mb/TPB):
+    mbt = int(mb/TPB)
+    for i2 in range(mbt):
         sebx[tx] = eb[tx + i2*TPB]
-        for j2 in range(mb/TPB):
+        for j2 in range(mbt):
             seby[ty] = eb[ty + j2*TPB]
             ssxb[tx,ty] = sxb[tx + i2*TPB,ty + j2*TPB]
             ssyb[tx,ty] = syb[tx + i2*TPB,ty + j2*TPB]
