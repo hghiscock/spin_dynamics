@@ -14,7 +14,7 @@ receptor_grid : int
     squared because the retina is modelled as a circle)
 angles : (Npoints, 2) ndarray of floats
     Angles for which input singlet yield values are calculated. First
-    dimension contained phis values, second contained theta values
+    dimension contains phis values, second contains theta values
 sy_values : (Npoints,) ndarray of floats
     Singlet yield values evaluated for the field directions specified
     in the angles array

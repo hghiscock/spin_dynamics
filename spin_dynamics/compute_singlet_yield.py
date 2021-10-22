@@ -292,4 +292,6 @@ def compute_singlet_yield(parameters, hA = None, hB = None, h = None,
             raise Exception("You need to define the RF parameters!")
     return np.real(PhiS)
 
+#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 
