@@ -8,7 +8,7 @@ Prerequisites:
 - numpy
 - scipy
 - numba
-- (CUDA if using a GPU)
+- CUDA if using a GPU (you can use `export NUMBA_ENABLE_CUDASIM=1` to use the CUDA simulator, but this will be slower than running CPU version)
 
 To build the package, run:
 ```
