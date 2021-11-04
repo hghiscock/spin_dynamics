@@ -17,12 +17,18 @@ class RetinaSignal:
         Number of receptors in each dimension in a square grid (Note, the
         total number of receptors will end up being less than this number
         squared because the retina is modelled as a circle)
-    angles : (Npoints, 2) ndarray of floats
+    angles : (Npoints, 2) ndarray of floats, optional
         Angles for which input singlet yield values are calculated. First
         dimension contains phis values, second contains theta values
-    sy_values : (Npoints,) ndarray of floats
+        (Default: None)
+    sy_values : (Npoints,) ndarray of floats, optional
         Singlet yield values evaluated for the field directions specified
-        in the angles array
+        in the angles array (Default: None)
+    func_form : function, optional
+        The functional form for the singlet yield as a function of polar
+        angles theta, phi and list of other parameters (Default: None)
+    func_parameters : () ndarray, optional
+        Extra parameters to pass to the func_form function (Default: None)
     beta : float, optional
         beta angle for orientation of magnetoreceptor molecule in receptor
         cell (Default: 0.5*pi)
@@ -34,11 +40,23 @@ class RetinaSignal:
         cell (Default: 0.5*pi)
     inclination : float, optional
         The inclination angle of the geomagnetic field
+
+    Raises
+    ------
+    Please specify functional form
 '''
 
-    def __init__(self, receptor_grid, angles, sy_values,
-                 beta = 0.5*np.pi, gamma = 0.0, eta = 0.5*np.pi,
+    def __init__(self, receptor_grid, func_form=None, func_parameters=None,
+                 angles=None, sy_values=None, beta = 0.5*np.pi, 
+                 gamma = 0.0, eta = 0.5*np.pi, 
                  inclination = np.pi*11/30):
+
+        if sy_values is None:
+           self.__artificial_signal = True
+           if func_form is None:
+               raise Exception("Please specify functional form")
+        else:
+            self.__artificial_signal = False
 
         #Store angles
         self.beta = beta
@@ -58,9 +76,18 @@ class RetinaSignal:
         self.phi = np.arctan2(rgrid*np.sin(thgrid),rgrid*np.cos(thgrid))
 
         #Singlet yield interpolator
-        self.c0int = CloughTocher2DInterpolator(angles,sy_values)
+        if sy_values is not None:
+            self.c0int = CloughTocher2DInterpolator(angles,sy_values)
+        if func_form is not None:
+            self.func_form = func_form
+        if func_parameters is not None:
+            self.func_parameters = func_parameters
 
-    def generate_signal(self, heading=None):
+    @property
+    def artificial_signal(self):
+        return self.__artificial_signal
+
+    def generate_signal(self, heading=None, normalize=False, ntrajectories=None):
         '''Generate the average singlet yield signal across the retina, for the
         specified heading, or for a random heading
 
@@ -70,10 +97,16 @@ class RetinaSignal:
             The heading direction for which to generate the singlet yield signal
             in radians, if None, the heading will be randomly selected 
             (Default: None)
+        normalize : boolean, optional
+            Whether to normalize the singlet yield signal for visualising or
+            as training data for CNN (Default: False)
+        ntrajectories : int, optional
+            How many photocycles over which to average, if None gives the
+            infinite limit (Default: None)
 
         Returns
         -------
-        sy_dat : (Npoints,) ndarray of floats
+        sy_dat : (Npoints,Npoints) ndarray of floats
             Singlet yield value at each receptor
 '''
 
@@ -88,13 +121,23 @@ class RetinaSignal:
                         [np.cos(chi)]])
 
         #Calculate c0 at grid points and average over eta
-        self.xi, self.delta = Bm(Br,self.beta,self.gamma,self.phi,
-                                 self.theta,self.eta)
+        xi, delta = Bm(Br,self.beta,self.gamma,self.phi,
+                       self.theta,self.eta)
 
-        sy_dat = self.c0int(self.xi,self.delta)
-        sy_dat *= self.rmask
+        if self.artificial_signal:
+            sy_dat = self.func_form(xi, delta, self.func_parameters)
+        else:
+            sy_dat = self.c0int(xi, delta)
+
+        if ntrajectories is not None:
+            sy_dat = np.random.binomial(ntrajectories, sy_dat).astype(float)\
+                        /ntrajectories
+
+        if normalize:
+            sy_dat -= np.mean(sy_dat)
+            sy_dat *= self.rmask
+
         return sy_dat
-
 
 #-----------------------------------------------------------------------------#
 
