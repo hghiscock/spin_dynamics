@@ -49,12 +49,10 @@ class RetinaSignal:
         #Set up grid in retina                                                                   
         r1grid, r2grid = np.mgrid[-1:1:receptor_grid*1j, -1:1:receptor_grid*1j]
         rgrid = np.sqrt(r1grid*r1grid + r2grid*r2grid)                                           
-        rmask = rgrid < 1.0                                                                     
-        rgrid = rgrid[rmask]                                                                    
+        self.rmask = rgrid < 1.0                                                                     
 
         thgrid = np.arctan2(r1grid,r2grid)
-        thgrid = thgrid[rmask]
-        self.nreceptors = len(rgrid)                                                             
+        self.nreceptors = np.sum(self.rmask)
 
         self.theta = 2.0*np.arctan(rgrid)                                                       
         self.phi = np.arctan2(rgrid*np.sin(thgrid),rgrid*np.cos(thgrid))
@@ -94,7 +92,9 @@ class RetinaSignal:
                                  self.theta,self.eta)
 
         sy_dat = self.c0int(self.xi,self.delta)
-        return np.squeeze(sy_dat)
+        sy_dat *= self.rmask
+        return sy_dat
+
 
 #-----------------------------------------------------------------------------#
 
@@ -120,6 +120,7 @@ class HeadingAccuracy:
 
         for i in range(nheadings):
             sy_tmp = retina_signal.generate_signal()
+            sy_tmp = sy_tmp[retina_signal.rmask]
             self.sy_data[:,i] = sy_tmp
             self.sy_av += sy_tmp
             self.dep_covar[:,i] = sy_tmp * (1.0-sy_tmp)
