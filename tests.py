@@ -1,7 +1,6 @@
 import unittest
 import numpy as np
 import spin_dynamics
-from numba import cuda
 
 #-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
@@ -358,13 +357,13 @@ class TestWavepacket(unittest.TestCase):
                                "Wavepacket failed")
                                     
 #-----------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------#
 
 class TestHeadingAccuracy(unittest.TestCase):
 
     def test_heading_accuracy_calc(self):
         angles, sy_values = spin_dynamics.load_test_data()
-        retina_signal = spin_dynamics.RetinaSignal(40, angles, sy_values)
+        retina_signal = spin_dynamics.RetinaSignal(40, angles=angles,
+                                                   sy_values=sy_values)
 
         heading_accuracy = spin_dynamics.HeadingAccuracy(retina_signal, 1000)
         output = heading_accuracy.lower_bound_error(
@@ -372,6 +371,24 @@ class TestHeadingAccuracy(unittest.TestCase):
 
         self.assertTrue(output < 0.95 and output > 0.85, 
                         "Heading Accuracy calculation failed")
+
+#-----------------------------------------------------------------------------#
+
+class TestCNN(unittest.TestCase):
+
+    def test_CNN(self):
+        retina_signal = spin_dynamics.RetinaSignal(
+                            40, func_form=gx, func_parameters=[np.pi/7.0])
+        conv_model = spin_dynamics.ConvolutionalModel(40)
+        with open('src/cnn_model.txt','r') as f:
+            json_model = f.read()   
+        new_model = spin_dynamics.read_in_model(json_model)
+        self.assertTrue(conv_model.summary() == new_model.summary())
+
+def gx(th, phi, params):                                                                                 
+        gx = 0.5 - 1.0*1.27E-3*np.exp(-0.5*((th - np.pi/2.0)/params[0])**2.0)\
+                /(1.0 - np.exp(-0.5*(np.pi/2.0/params[0])**2.0))
+        return gx
 
 #-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
