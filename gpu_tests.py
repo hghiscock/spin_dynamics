@@ -120,7 +120,8 @@ class TestHeadingAccuracy(unittest.TestCase):
 
     def test_heading_accuracy_calc(self):
         angles, sy_values = spin_dynamics.load_test_data()
-        retina_signal = spin_dynamics.RetinaSignal(40, angles, sy_values)
+        retina_signal = spin_dynamics.RetinaSignal(
+                            40, angles=angles, sy_values=sy_values)
 
         heading_accuracy = spin_dynamics.HeadingAccuracy(retina_signal, 1000)
         output = heading_accuracy.lower_bound_error(
@@ -129,9 +130,16 @@ class TestHeadingAccuracy(unittest.TestCase):
         self.assertTrue(output < 0.95 and output > 0.85, 
                         "Heading Accuracy GPU calculation failed")
 
-#-----------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------#
+##-----------------------------------------------------------------------------#
+##-----------------------------------------------------------------------------#
 
 if __name__ == "__main__":
     unittest.main()
+
+
+
+
+
+
+
 
