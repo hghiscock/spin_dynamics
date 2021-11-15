@@ -383,7 +383,12 @@ class TestCNN(unittest.TestCase):
         with open('src/cnn_model.txt','r') as f:
             json_model = f.read()   
         new_model = spin_dynamics.read_in_model(json_model)
-        self.assertTrue(conv_model.summary() == new_model.summary())
+
+        for i in range(len(new_model.layers)):
+            self.assertTrue(conv_model.model.input_shape == 
+                                new_model.input_shape)
+            self.assertTrue(conv_model.model.output_shape == 
+                                new_model.output_shape)
 
 def gx(th, phi, params):                                                                                 
         gx = 0.5 - 1.0*1.27E-3*np.exp(-0.5*((th - np.pi/2.0)/params[0])**2.0)\
