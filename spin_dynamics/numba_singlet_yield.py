@@ -13,7 +13,7 @@ def energy_differences(e, m, n):
     wnm = np.zeros(n, dtype=np.float64)
     lp = np.zeros((n,2), dtype=np.int64)
     for i in prange(m):
-        for j in prange(i+1,m):
+        for j in range(i+1,m):
             c = int(i*m - (i/2.0)*(i+1) + j-(i+1))
             wnm[c] = e[j]-e[i]
             lp[c,0] = j
@@ -53,7 +53,7 @@ def bin_frequencies(n, m, nlw, nuw, dl, du, wmax, wnw, lp, sx, sy, sz):
 
         rab += rabtmp
 
-    for i in range(m):
+    for i in prange(m):
         r0[0] += sx[i,i]*sx[i,i]
         r0[1] += sy[i,i]*sx[i,i]
         r0[2] += sz[i,i]*sx[i,i]
@@ -74,7 +74,7 @@ def bin_frequencies(n, m, nlw, nuw, dl, du, wmax, wnw, lp, sx, sy, sz):
 def sy_symmetric_combined(m, e, tps, k):
     c0 = 0.0 + 0.0j
     for i in prange(m):
-        for j in prange(m):
+        for j in range(m):
             de = k + 1.0j*(e[i]-e[j])
             c0 += k/de*tps[i,j]*tps[j,i]
     return c0
@@ -88,9 +88,9 @@ def sy_symmetric_combined(m, e, tps, k):
 def sy_symmetric_separable(ma, mb, k, ea, eb, sxa, sxb, sya, syb, sza, szb):
     c0 = 0.0 + 0.0j
     for i in prange(ma):
-        for j in prange(ma):
-            for m in prange(mb):
-                for l in prange(mb):
+        for j in range(ma):
+            for m in range(mb):
+                for l in range(mb):
                     de = k+1.0j*(ea[i]-ea[j]+eb[m]-eb[l])
                     ps=sxa[i,j]*sxb[m,l]+sya[i,j]*syb[m,l]+sza[i,j]*szb[m,l]
                     c0 += k/de*ps*np.conj(ps)
@@ -303,7 +303,7 @@ def calc_rab(q, m):
     rzx = np.complex128(0.0)
     for i in prange(m):
         iprime = i+m
-        for j in prange(m):
+        for j in range(m):
             jprime = j+m
             rxx += (np.conj(q[i,jprime])*q[iprime,j] +
                     np.conj(q[i,j])*q[iprime,jprime])

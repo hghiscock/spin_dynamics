@@ -257,17 +257,17 @@ def covariance(nreceptors, nheadings, ntrajectories,
                sy_dat, sy_av):
 
     covar = np.zeros((nreceptors,nreceptors), dtype=np.float64)
-    for i in range(nreceptors):
+    for i in prange(nreceptors):
         for j in range(i,nreceptors):
             covar_tmp = 0.0
-            for k in prange(nheadings):
+            for k in range(nheadings):
                 covar_tmp += (sy_dat[i,k]-sy_av[i])*(sy_dat[j,k]-sy_av[j])
             covar[i,j] = covar_tmp
             covar[j,i] = covar_tmp
 
-    for i in range(nreceptors):
+    for i in prange(nreceptors):
         covar_tmp = 0.0
-        for k in prange(nheadings):
+        for k in range(nheadings):
             mu = sy_dat[i,k]
             sigma2 = mu*(ntrajectories-mu)/ntrajectories
             covar_tmp += sigma2 + mu*mu - 2.0*mu*sy_av[i] + sy_av[i]*sy_av[i]
@@ -283,9 +283,9 @@ def diag_covariance(nreceptors, nheadings, ntrajectories,
                sy_dat, sy_av):
 
     covar = np.zeros(nreceptors, dtype=np.float64)
-    for i in range(nreceptors):
+    for i in prange(nreceptors):
         covar_tmp = 0.0
-        for k in prange(nheadings):
+        for k in range(nheadings):
             mu = sy_dat[i,k]
             sigma2 = mu*(ntrajectories-mu)/ntrajectories
             covar_tmp += sigma2 + mu*mu - 2.0*mu*sy_av[i] + sy_av[i]*sy_av[i]
@@ -339,8 +339,8 @@ def load_test_data():
     '''Load singlet yield data for unit test calculation
 '''
 
-    data = open('src/test_data.dat','r')
-    l = data.readlines()
+    with open('src/test_data.dat','r') as data:
+        l = data.readlines()
     data.close()
 
     ngrid = len(l)

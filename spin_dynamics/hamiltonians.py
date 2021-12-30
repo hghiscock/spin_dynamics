@@ -232,6 +232,7 @@ class SymmetricApprox(SymmetricUncoupled):
                                     delta, parameters.divider_bin,
                                     w_nm, indices, self.sx, self.sy, self.sz
                                     )
+
 #------------------------------------------------------------------------------#
 
 class SymmetricCoupled(CombinedHamiltonians):
