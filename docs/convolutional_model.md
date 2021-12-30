@@ -9,7 +9,7 @@ receptor_grid : int
     must match the number of receptors used to define the RetinaSignal                               
     object used to generate the training data)
 ```
-If you want to know the details of the network, such as layers and number of parameters, you can call the `aaummary()` function
+If you want to know the details of the network, such as layers and number of parameters, you can call the `summary()` function
 ```python
 CNN.summary()
 ```
