@@ -246,7 +246,8 @@ def Bm(Br,beta,gamma,phi,theta,eta):
                 np.dot(Ry(beta),Rz(gamma)))))
     Bm1 = np.dot(R.T,Br)
     xi = np.arccos(Bm1[2,0])
-    delta = np.arccos(Bm1[0,0]/np.sin(xi))
+    tmp = np.clip(Bm1[0,0]/np.sin(xi),-1.0,1.0)
+    delta = np.arccos(tmp)
     return xi, delta
 
 #-----------------------------------------------------------------------------#

@@ -13,7 +13,7 @@ Prerequisites:
 
 To build the package, run:
 ```
-python setup.py build
+python3 setup.py build
 ```
 ## Computing the Singlet Yield
 The general structure of a singlet yield calculation using the `spin_dynamics` package is as follows:
