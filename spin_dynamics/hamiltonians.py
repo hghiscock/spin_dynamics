@@ -46,12 +46,12 @@ class Hamiltonians:
         self.hy = sops[0,1]
         self.hz = sops[0,2]
         #Build cartesian spin operators
-        for i in range(self.n):
-            self.hx = sparse.kron(self.hx, sparse.eye(multiplicities[i]),
+        for m in multiplicities:
+            self.hx = sparse.kron(self.hx, sparse.eye(m),
                                   format="csr")
-            self.hy = sparse.kron(self.hy, sparse.eye(multiplicities[i]),
+            self.hy = sparse.kron(self.hy, sparse.eye(m),
                                   format="csr")
-            self.hz = sparse.kron(self.hz, sparse.eye(multiplicities[i]),
+            self.hz = sparse.kron(self.hz, sparse.eye(m),
                                   format="csr")
 
         #Build hyperfine hamiltonians

@@ -113,7 +113,7 @@ With this representation in hand we can train a convolutional neural network to 
 from spin_dynamics import ConvolutionalModel
 
 CNN = ConvolutionalModel(Ngrid)
-print(CNN.summary())
+CNN.summary()
 ```
 To generate training, dev and test sets for this model, we simply call the relevant functions
 ```python
