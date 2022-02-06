@@ -74,8 +74,10 @@ The model can be saved using
 ```python
 CNN.save_model('my_model')
 ```
+```
 path : str
     Directory to which to write the model parameters
+```
 This can then be read into a new instantiation of the ConvolutionalModel object
 ```python
 CNN_new = spin_dynamics.ConvolutionalModel(receptor_grid, path='my_model')
