@@ -13,15 +13,26 @@ class ConvolutionalModel:
     Parameters
     ----------
     receptor_grid : int
-        Number of receptors in each dimension in a square grid (Note, this
-        must match the number of receptors used to define the RetinaSignal
+        Number of receptors in each dimension in a square grid (Note, this 
+        must match the number of receptors used to define the RetinaSignal 
         object used to generate the training data)
+    path : str, optional
+        Directory from which to read in model, if None the model will be built
+        from scratch (Default: None)
+    domain : float, optional
+        Fraction of domain of angles to sample over (Default: 1.0)
 '''
 
-    def __init__(self, receptor_grid):
+    def __init__(self, receptor_grid, path=None, domain=1.0):
 
         self.xdim = receptor_grid
-        self.model = conv_model((self.xdim,self.xdim,1))
+        self.domain = domain
+
+        if path is not None:
+            self.model = tf.keras.models.load_model(path)
+        else:
+            self.model = conv_model((self.xdim,self.xdim,1))
+
         self.model.compile(optimizer='adam',
                                 loss=wrapped_loss,
                                 metrics=[wrapped_loss])
@@ -58,7 +69,8 @@ class ConvolutionalModel:
         for i in range(Ntrain):
             ytrain[i] = np.random.uniform(-1.0, 1.0)
             xtrain[i] = retina_signal.generate_signal(
-                                heading=ytrain[i]*np.pi, normalize=True,
+                                heading=ytrain[i]*np.pi*self.domain,
+                                normalize=True,
                                 ntrajectories=ntrajectories)
 
         xdev = np.zeros((Ndev, self.xdim, self.xdim))
@@ -67,7 +79,8 @@ class ConvolutionalModel:
         for i in range(Ndev):
             ydev[i] = np.random.uniform(-1.0, 1.0)
             xdev[i] = retina_signal.generate_signal(
-                                heading=ydev[i]*np.pi, normalize=True,
+                                heading=ydev[i]*np.pi*self.domain,
+                                normalize=True,
                                 ntrajectories=ntrajectories)
 
         self.train_dataset = tf.data.Dataset.from_tensor_slices(
@@ -97,7 +110,8 @@ class ConvolutionalModel:
         for i in range(Ntest):
             self.ytest[i] = np.random.uniform(-1.0, 1.0)
             self.xtest[i] = retina_signal.generate_signal(
-                                heading=self.ytest[i]*np.pi, normalize=True,
+                                heading=self.ytest[i]*np.pi*self.domain,
+                                normalize=True,
                                 ntrajectories=ntrajectories)
 
     def train_model(self, epochs=4):
@@ -117,6 +131,17 @@ class ConvolutionalModel:
 '''
         test_scores = self.model.evaluate(self.xtest, self.ytest, verbose=2)
         return np.sqrt(test_scores[1]*180*180)
+
+    def save_model(self, path):
+        '''Save the model to file
+
+        Parameters
+        ----------
+        path : str
+            Directory to which to write the model parameters
+'''
+
+        self.model.save(path, save_traces=False, include_optimizer=False)
 
 #-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
