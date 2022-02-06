@@ -57,14 +57,14 @@ class Hamiltonians:
         #Build hyperfine hamiltonians
         gamma_e = 1.76E8
         self.hhf = sparse.csr_matrix((self.m,self.m), dtype=complex)
-        for i in range(self.n):
-            if multiplicities[i] != 1:
+        for i, m in enumerate(multiplicities):
+            if m != 1:
                 for j in range(3):
                     for l in range(3):
                         htmp = sops[0,j]
                         mtmp = int(np.prod(multiplicities[:i]))
                         htmp = sparse.kron(htmp, sparse.eye(mtmp), format="csr")
-                        htmp = sparse.kron(htmp, sops[multiplicities[i]-2,l],
+                        htmp = sparse.kron(htmp, sops[m-2,l],
                                            format="csr")
                         mtmp = int(np.prod(multiplicities[i+1:]))
                         htmp = sparse.kron(htmp, sparse.eye(mtmp), format="csr")

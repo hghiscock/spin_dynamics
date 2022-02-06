@@ -1,13 +1,18 @@
 # Constructing a Convolutional Neural Network
 It is possible to train a CNN to learn how to interpret a singlet yield signal and predict the heading direction corresponding to that signal. The topology of the network and hyperparameters are pre-determined, and the only parameter the user has to specify is the size of the representation of the signal across the retina
 ```python
-CNN = spin_dynamics.ConvolutionalModel(receptor_grid)
+CNN = spin_dynamics.ConvolutionalModel(receptor_grid, path=None, domain=1.0)
 ```
 ```
 receptor_grid : int
     Number of receptors in each dimension in a square grid (Note, this
     must match the number of receptors used to define the RetinaSignal                               
     object used to generate the training data)
+path : str, optional
+    Directory from which to read in model, if None the model will be built
+    from scratch (Default: None)
+domain : float, optional
+    Fraction of domain of angles to sample over (Default: 1.0)
 ```
 If you want to know the details of the network, such as layers and number of parameters, you can call the `summary()` function
 ```python
@@ -63,3 +68,15 @@ epochs : int, optional
 CNN.evalute()
 ```
 The result of the `evaluate()` function is the root mean squared error of the network predicting the heading direction, in degrees.
+
+## Saving and restarting the model
+The model can be saved using
+```python
+CNN.save_model('my_model')
+```
+path : str
+    Directory to which to write the model parameters
+This can then be read into a new instantiation of the ConvolutionalModel object
+```python
+CNN_new = spin_dynamics.ConvolutionalModel(receptor_grid, path='my_model')
+```
