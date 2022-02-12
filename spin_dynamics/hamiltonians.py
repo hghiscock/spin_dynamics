@@ -41,7 +41,7 @@ class Hamiltonians:
             mmax = 2
         else:
             mmax = max(multiplicities)
-        sops = getsoperators(mmax)
+        sops = self.getsoperators(mmax)
         self.hx = sops[0,0]
         self.hy = sops[0,1]
         self.hz = sops[0,2]
@@ -73,6 +73,38 @@ class Hamiltonians:
                         self.hhf = self.hhf + atmp*htmp
 
         self.iden = sparse.identity(self.m, format="csr")
+
+    @staticmethod
+    def getsoperators(mmax):
+        '''Get spin operators for for all values of 2S+1 up to mmax
+        output a is an array a[i,j], i being value of 2S+1 and j being x, y, z
+'''
+        a = np.empty([mmax-1,3], dtype=object)
+        for i in range(1,mmax):
+            s = i/2.0
+            M = i+1
+            splus = sparse.lil_matrix((M,M), dtype=complex)
+            sminus = sparse.lil_matrix((M,M), dtype=complex)
+            for j in range(M-1):
+                ms = float(s-(j+1))
+                element = np.sqrt(s*(s+1) - ms*(ms+1))
+                splus[j,j+1] = element
+                sminus[j+1,j] = element
+
+            splus.asformat("csr")
+            sminus.asformat("csr")
+    
+            a[i-1,0] = 0.5*(splus+sminus)
+            a[i-1,1] = (splus-sminus)/(2.0j)
+
+            sz = sparse.lil_matrix((M,M), dtype=complex)
+            for j in range(M):
+                ms = float(s - j)
+                sz[j,j] = ms
+
+            a[i-1,2] = sz.asformat("csr")
+
+        return a
 
 #------------------------------------------------------------------------------#
 
@@ -968,47 +1000,6 @@ class Wavepacket(Hamiltonians):
 
         self.q = np.identity(self.m, dtype=complex)
         self.p = -1.0j*np.dot((self.h+htd0),self.q)
-
-#------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------#
-
-def soperators(s):
-    '''Build cartesian S operators for a general value of S
-    output: sx, sy, sz as sparse csr matrices
-'''
-    M = int(2*s+1)
-    splus = sparse.lil_matrix((M,M), dtype=complex)
-    sminus = sparse.lil_matrix((M,M), dtype=complex)
-    for i in range(M-1):
-        ms = float(s-(i+1))
-        element = np.sqrt(s*(s+1) - ms*(ms+1))
-        splus[i,i+1] = element
-        sminus[i+1,i] = element
-            
-    splus.asformat("csr")
-    sminus.asformat("csr")
-    
-    sx = 0.5*(splus+sminus)
-    sy = (splus-sminus)/(2.0j)
-
-    sz = sparse.lil_matrix((M,M), dtype=complex)
-    for i in range(M):
-        ms = float(s - i)
-        sz[i,i] = ms
-
-    sz.asformat("csr")
-
-    return sx, sy, sz
-
-def getsoperators(mmax):
-    '''Get spin operators for for all values of 2S+1 up to mmax
-    output a is an array a[i,j], i being value of 2S+1 and j being x, y, z
-'''
-    a = np.empty([mmax-1,3], dtype=object)
-    for i in range(1,mmax):
-        a[i-1,0], a[i-1,1], a[i-1,2] = soperators(i/2.0)
-
-    return a
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
