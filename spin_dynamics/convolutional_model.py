@@ -31,11 +31,11 @@ class ConvolutionalModel:
         if path is not None:
             self.model = tf.keras.models.load_model(path)
         else:
-            self.model = conv_model((self.xdim,self.xdim,1))
+            self.model = self.conv_model((self.xdim,self.xdim,1))
 
         self.model.compile(optimizer='adam',
-                                loss=wrapped_loss,
-                                metrics=[wrapped_loss])
+                                loss=self.wrapped_loss,
+                                metrics=[self.wrapped_loss])
 
     def summary(self):
         '''Return the model summary
@@ -143,42 +143,40 @@ class ConvolutionalModel:
 
         self.model.save(path, save_traces=False, include_optimizer=False)
 
-#-----------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------#
+    @staticmethod
+    def wrapped_loss(y, yhat):
+        '''Define loss function to account for the symmetry in angles'''
+        ydiff = y-yhat
+        y1 = ydiff - 2.0*float(int(ydiff))
+        return y1*y1
 
-def conv_model(input_shape, training=True):
-    '''Construct a convolutional neural network consisting of two convolutional
-    layers each followed by a batch normalization and ReLU activation, and a
-    max pool layer before the final dense layer with a single node
+    @staticmethod
+    def conv_model(input_shape, training=True):
+        '''Construct a convolutional neural network consisting of two convolutional
+        layers each followed by a batch normalization and ReLU activation, and a
+        max pool layer before the final dense layer with a single node
 
-    Input -> Conv -> BN -> ReLU -> Conv -> BN -> ReLU -> MaxPool -> Dense
+        Input -> Conv -> BN -> ReLU -> Conv -> BN -> ReLU -> MaxPool -> Dense
 '''
-    input_img = tf.keras.Input(shape=input_shape)
-    Z1 = tf.keras.layers.Conv2D(filters=32, kernel_size=8, strides=3, 
-         kernel_regularizer='l2')(input_img)
-    B1 = tf.keras.layers.BatchNormalization(axis=3)(Z1, training=training)
-    A1 = tf.keras.layers.ReLU()(B1)
+        input_img = tf.keras.Input(shape=input_shape)
+        Z1 = tf.keras.layers.Conv2D(filters=32, kernel_size=8, strides=3, 
+             kernel_regularizer='l2')(input_img)
+        B1 = tf.keras.layers.BatchNormalization(axis=3)(Z1, training=training)
+        A1 = tf.keras.layers.ReLU()(B1)
 
-    Z2 = tf.keras.layers.Conv2D(filters=32, kernel_size=3, padding='valid')(A1)
-    B2 = tf.keras.layers.BatchNormalization(axis=3)(Z2, training=training)
-    A2 = tf.keras.layers.ReLU()(B2)
-    P2 = tf.keras.layers.MaxPool2D(pool_size=3, strides=3)(A2)
+        Z2 = tf.keras.layers.Conv2D(filters=32, kernel_size=3, padding='valid')(A1)
+        B2 = tf.keras.layers.BatchNormalization(axis=3)(Z2, training=training)
+        A2 = tf.keras.layers.ReLU()(B2)
+        P2 = tf.keras.layers.MaxPool2D(pool_size=3, strides=3)(A2)
 
-    F = tf.keras.layers.Flatten()(P2)
-    outputs = tf.keras.layers.Dense(units=1, kernel_regularizer='l2',
-                                    activation='tanh')(F)
+        F = tf.keras.layers.Flatten()(P2)
+        outputs = tf.keras.layers.Dense(units=1, kernel_regularizer='l2',
+                                        activation='tanh')(F)
 
-    conv_model = tf.keras.Model(inputs=input_img, outputs=outputs)
-    return conv_model
+        conv_model = tf.keras.Model(inputs=input_img, outputs=outputs)
+        return conv_model
 
 #-----------------------------------------------------------------------------#
-
-def wrapped_loss(y, yhat):
-    '''Define loss function to account for the symmetry in angles'''
-    ydiff = y-yhat
-    y1 = ydiff - 2.0*float(int(ydiff))
-    return y1*y1
-
 #-----------------------------------------------------------------------------#
 
 def read_in_model(json):
