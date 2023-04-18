@@ -141,5 +141,5 @@ heading_accuracy = HeadingAccuracy(retina_signal, nheadings)
 heading_error = heading_accuracy.lower_bound_error(retina_signal, ntrajectories)
 ```
 
-## Unit tests
+## Regression tests
 The file `tests.py` contains unit tests for each possible type of calculation using this package, which serves as a useful template for all the configurations of different parameters that lead to different computations. `gpu_tests.py` contains unit tests for calculations using a CUDA enabled GPU.
